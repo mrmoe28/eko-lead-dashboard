@@ -42,6 +42,10 @@ export default function DashboardPage() {
     setIsModalOpen(true);
   };
 
+  const handleDelete = (id: number) => {
+    setLeads(prev => prev.filter(lead => lead.id !== id));
+  };
+
   const hotLeads = leads.filter((l) => l.score >= 80);
   const warmLeads = leads.filter((l) => l.score >= 60 && l.score < 80);
   const coldLeads = leads.filter((l) => l.score < 60);
@@ -217,7 +221,12 @@ export default function DashboardPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {recentLeads.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} onViewDetails={handleViewDetails} />
+              <LeadCard
+                key={lead.id}
+                lead={lead}
+                onViewDetails={handleViewDetails}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
@@ -228,6 +237,7 @@ export default function DashboardPage() {
         lead={selectedLead}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onDelete={handleDelete}
       />
     </div>
   );

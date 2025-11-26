@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Lead } from "@/lib/db/schema";
 import {
   Modal,
@@ -10,16 +11,44 @@ import {
   Button,
   Chip,
 } from "@heroui/react";
-import { Phone, Mail, MapPin, DollarSign, Clock, ExternalLink, User } from "lucide-react";
+import { Phone, Mail, MapPin, DollarSign, Clock, ExternalLink, User, Trash2 } from "lucide-react";
 
 interface LeadDetailModalProps {
   lead: Lead | null;
   isOpen: boolean;
   onClose: () => void;
+  onDelete?: (id: number) => void;
 }
 
-export function LeadDetailModal({ lead, isOpen, onClose }: LeadDetailModalProps) {
+export function LeadDetailModal({ lead, isOpen, onClose, onDelete }: LeadDetailModalProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   if (!lead) return null;
+
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete lead "${lead.name}"?`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/leads?id=${lead.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        onDelete?.(lead.id);
+        onClose();
+      } else {
+        alert('Failed to delete lead');
+      }
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      alert('Failed to delete lead');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const revenue = lead.revenueMin && lead.revenueMax
     ? `$${lead.revenueMin.toLocaleString()} - $${lead.revenueMax.toLocaleString()}`
@@ -183,19 +212,36 @@ export function LeadDetailModal({ lead, isOpen, onClose }: LeadDetailModalProps)
         </ModalBody>
 
         <ModalFooter>
-          <Button color="danger" variant="light" onPress={onClose}>
-            Close
-          </Button>
-          {lead.phone && (
-            <Button
-              color="primary"
-              startContent={<Phone className="h-4 w-4" />}
-              as="a"
-              href={`tel:${lead.phone}`}
-            >
-              Call Now
-            </Button>
-          )}
+          <div className="flex w-full items-center justify-between">
+            <div>
+              {onDelete && (
+                <Button
+                  color="danger"
+                  variant="flat"
+                  startContent={<Trash2 className="h-4 w-4" />}
+                  onPress={handleDelete}
+                  isLoading={isDeleting}
+                >
+                  Delete Lead
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button color="default" variant="light" onPress={onClose}>
+                Close
+              </Button>
+              {lead.phone && (
+                <Button
+                  color="primary"
+                  startContent={<Phone className="h-4 w-4" />}
+                  as="a"
+                  href={`tel:${lead.phone}`}
+                >
+                  Call Now
+                </Button>
+              )}
+            </div>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

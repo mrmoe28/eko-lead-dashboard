@@ -70,6 +70,10 @@ export default function LeadsLibraryPage() {
     setIsModalOpen(true);
   };
 
+  const handleDelete = (id: number) => {
+    setLeads(prev => prev.filter(lead => lead.id !== id));
+  };
+
   const sources = Array.from(new Set(leads.map(l => l.source))).sort();
   const hasActiveFilters = searchQuery || priorityFilter !== "all" || sourceFilter !== "all";
 
@@ -219,7 +223,12 @@ export default function LeadsLibraryPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filteredLeads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} onViewDetails={handleViewDetails} />
+            <LeadCard
+              key={lead.id}
+              lead={lead}
+              onViewDetails={handleViewDetails}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}
@@ -229,6 +238,7 @@ export default function LeadsLibraryPage() {
         lead={selectedLead}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onDelete={handleDelete}
       />
     </div>
   );

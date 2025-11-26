@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import type { Lead } from "@/lib/db/schema";
 import { Card, CardHeader, CardBody, Chip, Button } from "@heroui/react";
-import { Phone, Mail, MapPin, DollarSign, Clock } from "lucide-react";
+import { Phone, Mail, MapPin, DollarSign, Clock, Trash2 } from "lucide-react";
 
 interface LeadCardProps {
   lead: Lead;
   onViewDetails: (lead: Lead) => void;
+  onDelete?: (id: number) => void;
 }
 
 function getPriorityColor(priority: string): "danger" | "warning" | "default" {
@@ -26,10 +28,36 @@ function getScoreGradient(score: number): string {
   return "from-blue-400 to-cyan-400"; // Cold
 }
 
-export function LeadCard({ lead, onViewDetails }: LeadCardProps) {
+export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const revenue = lead.revenueMin && lead.revenueMax
     ? `$${(lead.revenueMin / 1000).toFixed(0)}k-$${(lead.revenueMax / 1000).toFixed(0)}k`
     : "Not specified";
+
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete lead "${lead.name}"?`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/leads?id=${lead.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        onDelete?.(lead.id);
+      } else {
+        alert('Failed to delete lead');
+      }
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      alert('Failed to delete lead');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <Card
@@ -50,8 +78,22 @@ export function LeadCard({ lead, onViewDetails }: LeadCardProps) {
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <div className={`bg-gradient-to-r ${getScoreGradient(lead.score)} text-white font-bold rounded-full px-3 py-1 text-sm`}>
-              {lead.score}
+            <div className="flex items-center gap-2">
+              <div className={`bg-gradient-to-r ${getScoreGradient(lead.score)} text-white font-bold rounded-full px-3 py-1 text-sm`}>
+                {lead.score}
+              </div>
+              {onDelete && (
+                <Button
+                  isIconOnly
+                  size="sm"
+                  color="danger"
+                  variant="light"
+                  onPress={handleDelete}
+                  isLoading={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             <Chip color={getPriorityColor(lead.priority)} size="sm" variant="flat">
               {lead.priority.toUpperCase()}

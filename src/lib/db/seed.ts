@@ -1,26 +1,48 @@
 import { db } from './index';
 import { leads } from './schema';
 
-async function seed() {
-  console.log('🌱 Seeding database with sample lead data...');
+/**
+ * Database Seed Script
+ *
+ * WARNING: This file contains DEMO data only.
+ * The dashboard is designed to work with REAL leads from the scraper.
+ *
+ * To populate with real data, run:
+ *   cd solar-data-extractor
+ *   node scrape-leads.js Georgia
+ *
+ * Only run this seed script if you need demo data for testing.
+ */
 
+async function seed() {
+  console.log('⚠️  DEMO DATA SEED');
+  console.log('');
+  console.log('This will add sample leads to your database.');
+  console.log('For real data, run the scraper instead: node scrape-leads.js');
+  console.log('');
+  console.log('Skipping seed. Dashboard will show empty state until real leads are scraped.');
+
+  process.exit(0);
+
+  // DEMO DATA (commented out - uncomment only if you need test data)
+  /*
   const sampleLeads = [
     {
-      name: 'Sarah Johnson',
-      location: 'Austin, TX',
-      score: 95,
-      priority: 'urgent',
-      source: 'Nextdoor',
-      phone: '(512) 555-0123',
-      email: 'sarah.j@email.com',
-      request: 'Need complete kitchen remodel ASAP. Budget $50k-75k. Ready to start next week!',
-      whyHot: 'High budget, immediate timeline, qualified homeowner in premium zip code',
-      actionRequired: 'Call within 2 hours - competitor already scheduled consultation',
-      postedTime: '15 minutes ago',
-      profileUrl: 'https://nextdoor.com/profile/sarah-j',
-      originalPostUrl: 'https://nextdoor.com/post/kitchen-remodel-78701',
-      revenueMin: 50000,
-      revenueMax: 75000,
+      name: 'Demo Lead',
+      location: 'Test City, ST',
+      score: 85,
+      priority: 'high',
+      source: 'Demo',
+      phone: '(555) 555-0123',
+      email: 'demo@example.com',
+      request: 'This is demo data. Run the scraper for real leads.',
+      whyHot: 'Demo lead for testing',
+      actionRequired: 'Delete this and use real data',
+      postedTime: 'Demo',
+      profileUrl: null,
+      originalPostUrl: null,
+      revenueMin: 10000,
+      revenueMax: 20000,
       autoSubmitted: 0,
     },
     {
@@ -196,6 +218,7 @@ async function seed() {
   }
 
   process.exit(0);
+  */
 }
 
 seed();
