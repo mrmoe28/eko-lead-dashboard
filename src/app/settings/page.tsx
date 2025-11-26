@@ -155,9 +155,23 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {/* Configuration Guide */}
+      {/* Automated Setup */}
+      <Card className="p-6 bg-green-50 border-green-200">
+        <h3 className="font-semibold text-green-900 mb-3">✨ Automated Setup (Recommended)</h3>
+        <div className="space-y-2 text-sm text-green-800">
+          <p className="font-medium">No manual configuration needed! Just run:</p>
+          <code className="block bg-green-100 p-3 rounded mt-2 font-mono">
+            cd solar-data-extractor<br/>
+            ./setup.sh
+          </code>
+          <p className="mt-3">Or <strong>double-click</strong> <code className="bg-green-100 px-1 rounded">setup.command</code> on Mac!</p>
+          <p className="mt-2">The script automatically configures everything for you.</p>
+        </div>
+      </Card>
+
+      {/* Manual Configuration Guide */}
       <Card className="p-6 bg-blue-50 border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-3">Quick Setup Guide</h3>
+        <h3 className="font-semibold text-blue-900 mb-3">Manual Setup (Alternative)</h3>
         <div className="space-y-2 text-sm text-blue-800">
           <p><strong>Step 1:</strong> Copy the API key from above</p>
           <p><strong>Step 2:</strong> Add it to your scraper's <code className="bg-blue-100 px-1 rounded">.env</code> file</p>
