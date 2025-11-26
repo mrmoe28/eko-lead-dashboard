@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
+import { db } from "@/lib/db";
+import { scrapingSessions } from "@/lib/db/schema";
 
 export async function POST(request: Request) {
   try {
@@ -16,26 +14,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get the scraper path
-    const scraperPath = process.env.SCRAPER_PATH || "/Users/ekodevapps/Desktop/ekoleadgenerator/solar-data-extractor";
-
-    // Trigger scraper in background
-    const command = `cd "${scraperPath}" && node scrape-leads.js "${location}" > /dev/null 2>&1 &`;
-
-    exec(command, (error) => {
-      if (error) {
-        console.error('Failed to start scraper:', error);
-      }
-    });
+    // Create a pending scraping job
+    const [session] = await db
+      .insert(scrapingSessions)
+      .values({
+        location,
+        status: "pending",
+        totalLeadsFound: 0,
+      })
+      .returning();
 
     return NextResponse.json({
       success: true,
-      message: `Scraper started for ${location}`,
+      sessionId: session.id,
+      message: `Scraping job created for ${location}. Waiting for scraper to pick it up...`,
     });
   } catch (error) {
-    console.error("Error triggering scraper:", error);
+    console.error("Error creating scraping job:", error);
     return NextResponse.json(
-      { error: "Failed to trigger scraper" },
+      { error: "Failed to create scraping job" },
       { status: 500 }
     );
   }

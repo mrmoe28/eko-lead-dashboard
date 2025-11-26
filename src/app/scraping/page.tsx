@@ -149,6 +149,8 @@ export default function LiveScrapingPage() {
 
   function getStatusColor(status: string) {
     switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       case 'running':
         return 'bg-green-100 text-green-700 border-green-200';
       case 'completed':
@@ -295,9 +297,26 @@ export default function LiveScrapingPage() {
                   {new Date(currentSession.startedAt).toLocaleString()}
                 </p>
               </div>
+
+              {/* Pending status helper */}
+              {currentSession.status === 'pending' && (
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800 font-medium">
+                    ⏳ Waiting for scraper to pick up this job...
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Make sure the job watcher is running: <code className="bg-yellow-100 px-1 rounded">node watch-jobs.js</code>
+                  </p>
+                </div>
+              )}
             </div>
             {currentSession.status === 'running' && (
               <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            )}
+            {currentSession.status === 'pending' && (
+              <div className="w-8 h-8 text-yellow-600 flex items-center justify-center">
+                ⏳
+              </div>
             )}
           </div>
         </Card>
@@ -382,13 +401,26 @@ export default function LiveScrapingPage() {
 
       {/* Info Card */}
       <Card className="p-6 bg-blue-50 border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-2">How to Start Scraping</h3>
-        <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
-          <li>Configure the scraper CLI with your API key</li>
-          <li>Run the scraper: <code className="bg-blue-100 px-2 py-1 rounded">node scrape-leads.js Georgia</code></li>
-          <li>Watch real-time progress here in the dashboard</li>
-          <li>All leads are automatically saved to the database</li>
-        </ol>
+        <h3 className="font-semibold text-blue-900 mb-2">🚀 Two Ways to Start Scraping</h3>
+
+        <div className="space-y-4 text-sm text-blue-800">
+          <div>
+            <p className="font-semibold mb-2">Option 1: One-Click Dashboard Trigger (Recommended)</p>
+            <ol className="list-decimal list-inside space-y-1 ml-2">
+              <li>Start the job watcher on your local machine: <code className="bg-blue-100 px-2 py-1 rounded">node watch-jobs.js</code></li>
+              <li>Click "Start Scraping" above with your desired location</li>
+              <li>Watch real-time progress as the scraper automatically starts</li>
+            </ol>
+          </div>
+
+          <div>
+            <p className="font-semibold mb-2">Option 2: Manual CLI</p>
+            <ol className="list-decimal list-inside space-y-1 ml-2">
+              <li>Run directly: <code className="bg-blue-100 px-2 py-1 rounded">node scrape-leads.js Georgia</code></li>
+              <li>Watch real-time progress here in the dashboard</li>
+            </ol>
+          </div>
+        </div>
       </Card>
     </div>
   );
