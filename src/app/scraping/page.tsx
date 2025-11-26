@@ -3,14 +3,31 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Play, Square, Terminal, Loader2 } from "lucide-react";
 import type { ScrapingSession, ScrapingLog } from "@/lib/db/schema";
+
+// Scraping sources with their display info
+const SCRAPING_SOURCES = [
+  { id: 'permits', name: 'Building Permits', emoji: '🏗️' },
+  { id: 'incentives', name: 'Incentives', emoji: '💰' },
+  { id: 'reddit', name: 'Reddit', emoji: '🤖' },
+  { id: 'craigslist', name: 'Craigslist', emoji: '📋' },
+  { id: 'twitter', name: 'Twitter/X', emoji: '🐦' },
+  { id: 'yelp', name: 'Yelp', emoji: '⭐' },
+  { id: 'quora', name: 'Quora', emoji: '❓' },
+  { id: 'facebook', name: 'Facebook', emoji: '👥' },
+  { id: 'nextdoor', name: 'Nextdoor', emoji: '🏘️' },
+];
 
 export default function LiveScrapingPage() {
   const [sessions, setSessions] = useState<ScrapingSession[]>([]);
   const [currentSession, setCurrentSession] = useState<ScrapingSession | null>(null);
   const [logs, setLogs] = useState<ScrapingLog[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [location, setLocation] = useState("Georgia");
+  const [sourceProgress, setSourceProgress] = useState<Record<string, number>>({});
   const consoleRef = useRef<HTMLDivElement>(null);
 
   // Fetch sessions on mount
@@ -19,6 +36,20 @@ export default function LiveScrapingPage() {
     const interval = setInterval(fetchSessions, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Update source progress from logs
+  useEffect(() => {
+    const progress: Record<string, number> = {};
+    logs.forEach(log => {
+      const sourceKey = log.source.toLowerCase();
+      if (log.status === 'success') {
+        progress[sourceKey] = 100;
+      } else if (log.status === 'processing') {
+        progress[sourceKey] = 50;
+      }
+    });
+    setSourceProgress(progress);
+  }, [logs]);
 
   // Connect to SSE stream when current session changes
   useEffect(() => {
@@ -80,6 +111,37 @@ export default function LiveScrapingPage() {
     }
   }
 
+  async function startScraping() {
+    if (!location.trim()) {
+      alert('Please enter a location');
+      return;
+    }
+
+    setIsStarting(true);
+    try {
+      const response = await fetch('/api/scraping/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location }),
+      });
+
+      if (response.ok) {
+        // Wait a moment then refresh sessions
+        setTimeout(() => {
+          fetchSessions();
+          setIsStarting(false);
+        }, 2000);
+      } else {
+        alert('Failed to start scraper');
+        setIsStarting(false);
+      }
+    } catch (error) {
+      console.error('Error starting scraper:', error);
+      alert('Failed to start scraper');
+      setIsStarting(false);
+    }
+  }
+
   function formatTimestamp(timestamp: Date | string) {
     const date = new Date(timestamp);
     return date.toLocaleTimeString();
@@ -117,9 +179,88 @@ export default function LiveScrapingPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Live Scraping</h1>
         <p className="text-gray-600 mt-1">
-          Monitor real-time lead scraping activity
+          Start scraping and watch real-time progress
         </p>
       </div>
+
+      {/* Start Scraping Card */}
+      <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <h2 className="text-xl font-semibold mb-4">🚀 Start New Scraping Session</h2>
+        <div className="flex gap-3">
+          <Input
+            placeholder="Enter location (e.g., Georgia, Florida)"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="flex-1"
+            disabled={isStarting || currentSession?.status === 'running'}
+          />
+          <Button
+            onClick={startScraping}
+            disabled={isStarting || currentSession?.status === 'running'}
+            className="gap-2 min-w-[140px]"
+          >
+            {isStarting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Starting...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                Start Scraping
+              </>
+            )}
+          </Button>
+        </div>
+        {currentSession?.status === 'running' && (
+          <p className="text-sm text-gray-600 mt-2">
+            ⚠️ A scraping session is already running. Wait for it to complete.
+          </p>
+        )}
+      </Card>
+
+      {/* Progress Bars */}
+      {currentSession?.status === 'running' && (
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Scraping Progress</h2>
+          <div className="space-y-3">
+            {SCRAPING_SOURCES.map((source) => {
+              const progress = sourceProgress[source.id] || 0;
+              const isComplete = progress === 100;
+              const isProcessing = progress > 0 && progress < 100;
+
+              return (
+                <div key={source.id} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium">
+                      {source.emoji} {source.name}
+                    </span>
+                    <span className={`text-xs ${
+                      isComplete ? 'text-green-600' :
+                      isProcessing ? 'text-blue-600' :
+                      'text-gray-400'
+                    }`}>
+                      {isComplete ? '✓ Complete' :
+                       isProcessing ? 'Processing...' :
+                       'Waiting...'}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        isComplete ? 'bg-green-500' :
+                        isProcessing ? 'bg-blue-500' :
+                        'bg-gray-300'
+                      }`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
 
       {/* Current Session Status */}
       {currentSession && (
