@@ -197,8 +197,8 @@ export default function LiveScrapingPage() {
               <div className="space-y-2">
                 <p className="font-semibold text-green-900">Option 1: One-Click Trigger</p>
                 <ol className="list-decimal list-inside space-y-1 text-gray-700 ml-2">
-                  <li>Open terminal in <code className="bg-green-100 px-1 rounded text-xs">solar-data-extractor</code></li>
-                  <li>Run: <code className="bg-green-100 px-2 py-1 rounded">npm run watch</code></li>
+                  <li><strong>Mac:</strong> Double-click <code className="bg-green-100 px-1 rounded text-xs">Start-Watcher.command</code></li>
+                  <li><strong>Terminal:</strong> Run <code className="bg-green-100 px-2 py-1 rounded">./start-watcher.sh</code></li>
                   <li>Click "Start Scraping" below</li>
                 </ol>
               </div>
@@ -255,7 +255,7 @@ export default function LiveScrapingPage() {
               ⏳ Job created! Waiting for job watcher to pick it up...
             </p>
             <p className="text-xs text-yellow-700 mt-1">
-              Make sure <code className="bg-yellow-100 px-1 rounded">npm run watch</code> is running in solar-data-extractor folder
+              Start the watcher: Double-click <code className="bg-yellow-100 px-1 rounded">Start-Watcher.command</code> or run <code className="bg-yellow-100 px-1 rounded">./start-watcher.sh</code>
             </p>
           </div>
         )}
@@ -345,7 +345,7 @@ export default function LiveScrapingPage() {
                     ⏳ Waiting for scraper to pick up this job...
                   </p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Make sure the job watcher is running: <code className="bg-yellow-100 px-1 rounded">node watch-jobs.js</code>
+                    Start the watcher: <code className="bg-yellow-100 px-1 rounded">Start-Watcher.command</code> (Mac) or <code className="bg-yellow-100 px-1 rounded">./start-watcher.sh</code>
                   </p>
                 </div>
               )}
