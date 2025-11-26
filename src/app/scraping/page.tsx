@@ -5,20 +5,20 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Play, Square, Terminal, Loader2 } from "lucide-react";
+import { Play, Square, Terminal, Loader2, FileText, DollarSign, MessageSquare, List, Twitter, Star, HelpCircle, Users, Home } from "lucide-react";
 import type { ScrapingSession, ScrapingLog } from "@/lib/db/schema";
 
 // Scraping sources with their display info
 const SCRAPING_SOURCES = [
-  { id: 'permits', name: 'Building Permits', emoji: '🏗️' },
-  { id: 'incentives', name: 'Incentives', emoji: '💰' },
-  { id: 'reddit', name: 'Reddit', emoji: '🤖' },
-  { id: 'craigslist', name: 'Craigslist', emoji: '📋' },
-  { id: 'twitter', name: 'Twitter/X', emoji: '🐦' },
-  { id: 'yelp', name: 'Yelp', emoji: '⭐' },
-  { id: 'quora', name: 'Quora', emoji: '❓' },
-  { id: 'facebook', name: 'Facebook', emoji: '👥' },
-  { id: 'nextdoor', name: 'Nextdoor', emoji: '🏘️' },
+  { id: 'permits', name: 'Building Permits', icon: FileText },
+  { id: 'incentives', name: 'Incentives', icon: DollarSign },
+  { id: 'reddit', name: 'Reddit', icon: MessageSquare },
+  { id: 'craigslist', name: 'Craigslist', icon: List },
+  { id: 'twitter', name: 'Twitter/X', icon: Twitter },
+  { id: 'yelp', name: 'Yelp', icon: Star },
+  { id: 'quora', name: 'Quora', icon: HelpCircle },
+  { id: 'facebook', name: 'Facebook', icon: Users },
+  { id: 'nextdoor', name: 'Nextdoor', icon: Home },
 ];
 
 export default function LiveScrapingPage() {
@@ -42,14 +42,33 @@ export default function LiveScrapingPage() {
   // Update source progress from logs
   useEffect(() => {
     const progress: Record<string, number> = {};
+
     logs.forEach(log => {
-      const sourceKey = log.source.toLowerCase();
-      if (log.status === 'success') {
-        progress[sourceKey] = 100;
-      } else if (log.status === 'processing') {
-        progress[sourceKey] = 50;
+      // Match log source to our source IDs (case-insensitive matching)
+      const logSource = log.source.toLowerCase();
+
+      // Find matching source ID
+      let sourceId = '';
+      if (logSource.includes('permit')) sourceId = 'permits';
+      else if (logSource.includes('incentive')) sourceId = 'incentives';
+      else if (logSource.includes('reddit')) sourceId = 'reddit';
+      else if (logSource.includes('craigslist')) sourceId = 'craigslist';
+      else if (logSource.includes('twitter') || logSource.includes('x')) sourceId = 'twitter';
+      else if (logSource.includes('yelp')) sourceId = 'yelp';
+      else if (logSource.includes('quora')) sourceId = 'quora';
+      else if (logSource.includes('facebook')) sourceId = 'facebook';
+      else if (logSource.includes('nextdoor')) sourceId = 'nextdoor';
+
+      if (sourceId) {
+        if (log.status === 'success') {
+          progress[sourceId] = 100;
+        } else if (log.status === 'processing') {
+          progress[sourceId] = 50;
+        }
       }
     });
+
+    console.log('[Progress] Updated progress:', progress);
     setSourceProgress(progress);
   }, [logs]);
 
@@ -214,13 +233,13 @@ export default function LiveScrapingPage() {
   function getLogStatusIcon(status: string) {
     switch (status) {
       case 'processing':
-        return '⏳';
+        return '→';
       case 'success':
-        return '✅';
+        return '✓';
       case 'error':
-        return '❌';
+        return '✗';
       default:
-        return '📝';
+        return '·';
     }
   }
 
@@ -237,25 +256,25 @@ export default function LiveScrapingPage() {
       {/* Quick Start Guide */}
       <Card className="p-6 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white text-xl shrink-0">
-            ⚡
+          <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+            <Play className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold mb-3">⚡ Automated Scraping Setup</h2>
+            <h2 className="text-xl font-semibold mb-3">Automated Scraping Setup</h2>
             <div className="space-y-4 text-sm">
               <div className="p-4 bg-white rounded-lg border border-green-300">
-                <p className="font-semibold text-green-900 mb-2">🔧 One-Time Setup (5 seconds)</p>
+                <p className="font-semibold text-green-900 mb-2">One-Time Setup (5 seconds)</p>
                 <p className="text-gray-700 mb-2">Install the background watcher service - runs automatically on login:</p>
                 <ol className="list-decimal list-inside space-y-1 text-gray-700 ml-2">
                   <li><strong>Mac:</strong> Double-click <code className="bg-green-100 px-1 rounded text-xs">Install-Auto-Watcher.command</code></li>
                   <li><strong>Terminal:</strong> Run <code className="bg-green-100 px-2 py-1 rounded">./install-auto-watcher.sh</code></li>
                 </ol>
-                <p className="text-xs text-green-700 mt-2">✓ Auto-starts on login • ✓ Runs in background • ✓ No terminal needed</p>
+                <p className="text-xs text-green-700 mt-2">Auto-starts on login • Runs in background • No terminal needed</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <p className="font-semibold text-green-900">After Setup: Just Click Below! 🎯</p>
+                  <p className="font-semibold text-green-900">After Setup: Just Click Below</p>
                   <p className="text-gray-700 text-xs">
                     The watcher runs 24/7 in the background. Just click "Start Scraping" and it works!
                   </p>
@@ -274,7 +293,7 @@ export default function LiveScrapingPage() {
 
       {/* Start Scraping Card */}
       <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-        <h2 className="text-xl font-semibold mb-4">🎯 Trigger Scraping Job</h2>
+        <h2 className="text-xl font-semibold mb-4">Trigger Scraping Job</h2>
         <div className="flex gap-3">
           <Input
             placeholder="Enter location (e.g., Georgia, Florida)"
@@ -303,13 +322,13 @@ export default function LiveScrapingPage() {
         </div>
         {currentSession?.status === 'running' && (
           <p className="text-sm text-gray-600 mt-2">
-            ⚠️ A scraping session is already running. Wait for it to complete.
+            A scraping session is already running. Wait for it to complete.
           </p>
         )}
         {currentSession?.status === 'pending' && (
           <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800 font-medium">
-              ⏳ Job created! Waiting for job watcher to pick it up...
+              Job created! Waiting for job watcher to pick it up...
             </p>
             <p className="text-xs text-yellow-700 mt-1">
               <strong>First time?</strong> Double-click <code className="bg-yellow-100 px-1 rounded">Install-Auto-Watcher.command</code> to set up automatic scraping (one-time setup)
@@ -327,19 +346,21 @@ export default function LiveScrapingPage() {
               const progress = sourceProgress[source.id] || 0;
               const isComplete = progress === 100;
               const isProcessing = progress > 0 && progress < 100;
+              const Icon = source.icon;
 
               return (
                 <div key={source.id} className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">
-                      {source.emoji} {source.name}
-                    </span>
-                    <span className={`text-xs ${
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-gray-600" />
+                      <span className="font-medium">{source.name}</span>
+                    </div>
+                    <span className={`text-xs font-medium ${
                       isComplete ? 'text-green-600' :
                       isProcessing ? 'text-blue-600' :
                       'text-gray-400'
                     }`}>
-                      {isComplete ? '✓ Complete' :
+                      {isComplete ? 'Complete' :
                        isProcessing ? 'Processing...' :
                        'Waiting...'}
                     </span>
@@ -399,7 +420,7 @@ export default function LiveScrapingPage() {
               {currentSession.status === 'pending' && (
                 <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-800 font-medium">
-                    ⏳ Waiting for scraper to pick up this job...
+                    Waiting for scraper to pick up this job...
                   </p>
                   <p className="text-xs text-yellow-700 mt-1">
                     Install auto-watcher: <code className="bg-yellow-100 px-1 rounded">Install-Auto-Watcher.command</code> (one-time setup, then it works automatically)
@@ -412,7 +433,7 @@ export default function LiveScrapingPage() {
             )}
             {currentSession.status === 'pending' && (
               <div className="w-8 h-8 text-yellow-600 flex items-center justify-center">
-                ⏳
+                <Loader2 className="w-6 h-6 animate-spin" />
               </div>
             )}
           </div>
@@ -551,7 +572,7 @@ export default function LiveScrapingPage() {
 
       {/* Tips Card */}
       <Card className="p-6 bg-gray-50 border-gray-200">
-        <h3 className="font-semibold text-gray-900 mb-3">💡 Tips</h3>
+        <h3 className="font-semibold text-gray-900 mb-3">Tips</h3>
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex items-start gap-2">
             <span className="text-blue-600">•</span>
