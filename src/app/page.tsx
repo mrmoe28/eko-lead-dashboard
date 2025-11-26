@@ -1,30 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import type { Lead } from "@/lib/db/schema";
 import { LeadCard } from "@/components/lead-card";
 import { LeadDetailModal } from "@/components/lead-detail-modal";
-import { Input, Select, SelectItem, Button, Spinner } from "@heroui/react";
-import { Search, Filter } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  TrendingUp,
+  Users,
+  DollarSign,
+  Activity,
+  ArrowRight,
+  Radio
+} from "lucide-react";
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
-  // Fetch leads on mount
   useEffect(() => {
     async function fetchLeads() {
       try {
         const response = await fetch("/api/leads");
         const data = await response.json();
         setLeads(data);
-        setFilteredLeads(data);
       } catch (error) {
         console.error("Failed to fetch leads:", error);
       } finally {
@@ -34,164 +37,191 @@ export default function DashboardPage() {
     fetchLeads();
   }, []);
 
-  // Filter leads when filters change
-  useEffect(() => {
-    let filtered = [...leads];
-
-    // Search filter
-    if (searchQuery) {
-      filtered = filtered.filter((lead) =>
-        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lead.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lead.request.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Priority filter
-    if (priorityFilter !== "all") {
-      filtered = filtered.filter((lead) => lead.priority === priorityFilter);
-    }
-
-    // Source filter
-    if (sourceFilter !== "all") {
-      filtered = filtered.filter((lead) => lead.source === sourceFilter);
-    }
-
-    // Sort by score (highest first)
-    filtered.sort((a, b) => b.score - a.score);
-
-    setFilteredLeads(filtered);
-  }, [searchQuery, priorityFilter, sourceFilter, leads]);
-
   const handleViewDetails = (lead: Lead) => {
     setSelectedLead(lead);
     setIsModalOpen(true);
   };
 
-  const sources = ["Nextdoor", "HomeAdvisor", "Thumbtack", "Angi"];
+  const hotLeads = leads.filter((l) => l.score >= 80);
+  const warmLeads = leads.filter((l) => l.score >= 60 && l.score < 80);
+  const coldLeads = leads.filter((l) => l.score < 60);
+
+  const avgDealSize = 15000;
+  const estimatedRevenue = Math.round(hotLeads.length * avgDealSize * 0.15);
+
+  const recentLeads = leads
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 6);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold">Eko Lead Dashboard</h1>
-          <p className="text-sm text-gray-600">AI-powered lead generation for contractors</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Welcome back! Here's your lead overview.</p>
         </div>
-      </header>
+        <Link href="/scraping">
+          <Button className="gap-2">
+            <Radio className="w-4 h-4" />
+            Start Scraping
+          </Button>
+        </Link>
+      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="h-5 w-5 text-gray-600" />
-            <h2 className="font-semibold">Filters</h2>
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Leads</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{leads.length}</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
           </div>
+          <p className="text-sm text-gray-500 mt-4">
+            <span className="text-green-600 font-medium">+{hotLeads.length}</span> hot leads
+          </p>
+        </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Input
-              placeholder="Search leads..."
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-              startContent={<Search className="h-4 w-4 text-gray-400" />}
-              isClearable
-              onClear={() => setSearchQuery("")}
-            />
-
-            <Select
-              label="Priority"
-              placeholder="All priorities"
-              selectedKeys={priorityFilter ? [priorityFilter] : []}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-            >
-              <SelectItem key="all">All Priorities</SelectItem>
-              <SelectItem key="urgent">Urgent</SelectItem>
-              <SelectItem key="high">High</SelectItem>
-              <SelectItem key="medium">Medium</SelectItem>
-            </Select>
-
-            <Select
-              label="Source"
-              placeholder="All sources"
-              selectedKeys={sourceFilter ? [sourceFilter] : []}
-              onChange={(e) => setSourceFilter(e.target.value)}
-            >
-              <SelectItem key="all">All Sources</SelectItem>
-              <SelectItem key="Nextdoor">Nextdoor</SelectItem>
-              <SelectItem key="HomeAdvisor">HomeAdvisor</SelectItem>
-              <SelectItem key="Thumbtack">Thumbtack</SelectItem>
-              <SelectItem key="Angi">Angi</SelectItem>
-            </Select>
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Hot Leads</p>
+              <p className="text-3xl font-bold text-red-600 mt-2">{hotLeads.length}</p>
+            </div>
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-red-600" />
+            </div>
           </div>
+          <p className="text-sm text-gray-500 mt-4">Score 80+ ready to convert</p>
+        </Card>
 
-          {(searchQuery || priorityFilter !== "all" || sourceFilter !== "all") && (
-            <div className="mt-4 flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="flat"
-                onPress={() => {
-                  setSearchQuery("");
-                  setPriorityFilter("all");
-                  setSourceFilter("all");
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Est. Revenue</p>
+              <p className="text-3xl font-bold text-green-600 mt-2">
+                ${(estimatedRevenue / 1000).toFixed(0)}k
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mt-4">15% close rate estimate</p>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+              <p className="text-3xl font-bold text-purple-600 mt-2">
+                {leads.length > 0 ? Math.round((hotLeads.length / leads.length) * 100) : 0}%
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Activity className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mt-4">Hot leads vs total</p>
+        </Card>
+      </div>
+
+      {/* Lead Distribution */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Lead Distribution</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-red-900">Hot Leads</span>
+              <span className="text-2xl font-bold text-red-700">{hotLeads.length}</span>
+            </div>
+            <div className="w-full bg-red-200 rounded-full h-2">
+              <div
+                className="bg-red-600 h-2 rounded-full"
+                style={{
+                  width: `${leads.length > 0 ? (hotLeads.length / leads.length) * 100 : 0}%`,
                 }}
-              >
-                Clear Filters
+              />
+            </div>
+            <p className="text-xs text-red-700 mt-2">Score 80+</p>
+          </div>
+
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-orange-900">Warm Leads</span>
+              <span className="text-2xl font-bold text-orange-700">{warmLeads.length}</span>
+            </div>
+            <div className="w-full bg-orange-200 rounded-full h-2">
+              <div
+                className="bg-orange-600 h-2 rounded-full"
+                style={{
+                  width: `${leads.length > 0 ? (warmLeads.length / leads.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
+            <p className="text-xs text-orange-700 mt-2">Score 60-79</p>
+          </div>
+
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-blue-900">Cold Leads</span>
+              <span className="text-2xl font-bold text-blue-700">{coldLeads.length}</span>
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-2">
+              <div
+                className="bg-blue-600 h-2 rounded-full"
+                style={{
+                  width: `${leads.length > 0 ? (coldLeads.length / leads.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
+            <p className="text-xs text-blue-700 mt-2">Score &lt;60</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Recent Hot Leads */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Recent Hot Leads</h2>
+          <Link href="/leads">
+            <Button variant="outline" className="gap-2">
+              View All
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
+
+        {recentLeads.length === 0 ? (
+          <Card className="p-12 text-center">
+            <p className="text-gray-500">No leads yet. Start scraping to find leads!</p>
+            <Link href="/scraping">
+              <Button className="mt-4 gap-2">
+                <Radio className="w-4 h-4" />
+                Start Scraping
               </Button>
-              <span className="text-sm text-gray-600">
-                Showing {filteredLeads.length} of {leads.length} leads
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="text-sm text-gray-600">Total Leads</div>
-            <div className="text-2xl font-bold">{leads.length}</div>
-          </div>
-          <div className="bg-red-50 rounded-lg shadow-sm p-4 border border-red-200">
-            <div className="text-sm text-red-600">Hot Leads (80+)</div>
-            <div className="text-2xl font-bold text-red-700">
-              {leads.filter((l) => l.score >= 80).length}
-            </div>
-          </div>
-          <div className="bg-orange-50 rounded-lg shadow-sm p-4 border border-orange-200">
-            <div className="text-sm text-orange-600">Warm Leads (60-79)</div>
-            <div className="text-2xl font-bold text-orange-700">
-              {leads.filter((l) => l.score >= 60 && l.score < 80).length}
-            </div>
-          </div>
-          <div className="bg-blue-50 rounded-lg shadow-sm p-4 border border-blue-200">
-            <div className="text-sm text-blue-600">Cold Leads (&lt;60)</div>
-            <div className="text-2xl font-bold text-blue-700">
-              {leads.filter((l) => l.score < 60).length}
-            </div>
-          </div>
-        </div>
-
-        {/* Lead Cards */}
-        {filteredLeads.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-gray-500">No leads found matching your filters.</p>
-          </div>
+            </Link>
+          </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredLeads.map((lead) => (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {recentLeads.map((lead) => (
               <LeadCard key={lead.id} lead={lead} onViewDetails={handleViewDetails} />
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {/* Detail Modal */}
       <LeadDetailModal
