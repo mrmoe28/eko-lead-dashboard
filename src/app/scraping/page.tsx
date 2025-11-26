@@ -189,26 +189,34 @@ export default function LiveScrapingPage() {
       <Card className="p-6 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white text-xl shrink-0">
-            ✓
+            ⚡
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold mb-3">🚀 Quick Start</h2>
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
-              <div className="space-y-2">
-                <p className="font-semibold text-green-900">Option 1: One-Click Trigger</p>
+            <h2 className="text-xl font-semibold mb-3">⚡ Automated Scraping Setup</h2>
+            <div className="space-y-4 text-sm">
+              <div className="p-4 bg-white rounded-lg border border-green-300">
+                <p className="font-semibold text-green-900 mb-2">🔧 One-Time Setup (5 seconds)</p>
+                <p className="text-gray-700 mb-2">Install the background watcher service - runs automatically on login:</p>
                 <ol className="list-decimal list-inside space-y-1 text-gray-700 ml-2">
-                  <li><strong>Mac:</strong> Double-click <code className="bg-green-100 px-1 rounded text-xs">Start-Watcher.command</code></li>
-                  <li><strong>Terminal:</strong> Run <code className="bg-green-100 px-2 py-1 rounded">./start-watcher.sh</code></li>
-                  <li>Click "Start Scraping" below</li>
+                  <li><strong>Mac:</strong> Double-click <code className="bg-green-100 px-1 rounded text-xs">Install-Auto-Watcher.command</code></li>
+                  <li><strong>Terminal:</strong> Run <code className="bg-green-100 px-2 py-1 rounded">./install-auto-watcher.sh</code></li>
                 </ol>
+                <p className="text-xs text-green-700 mt-2">✓ Auto-starts on login • ✓ Runs in background • ✓ No terminal needed</p>
               </div>
-              <div className="space-y-2">
-                <p className="font-semibold text-green-900">Option 2: Manual Run</p>
-                <ol className="list-decimal list-inside space-y-1 text-gray-700 ml-2">
-                  <li>Open terminal in <code className="bg-green-100 px-1 rounded text-xs">solar-data-extractor</code></li>
-                  <li>Run: <code className="bg-green-100 px-2 py-1 rounded">npm run scrape Georgia</code></li>
-                  <li>Watch progress below</li>
-                </ol>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="font-semibold text-green-900">After Setup: Just Click Below! 🎯</p>
+                  <p className="text-gray-700 text-xs">
+                    The watcher runs 24/7 in the background. Just click "Start Scraping" and it works!
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-semibold text-green-900">Alternative: Manual Run</p>
+                  <p className="text-gray-700 text-xs">
+                    Don't want background service? Run manually: <code className="bg-green-100 px-1 rounded">npm run scrape Georgia</code>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -255,7 +263,7 @@ export default function LiveScrapingPage() {
               ⏳ Job created! Waiting for job watcher to pick it up...
             </p>
             <p className="text-xs text-yellow-700 mt-1">
-              Start the watcher: Double-click <code className="bg-yellow-100 px-1 rounded">Start-Watcher.command</code> or run <code className="bg-yellow-100 px-1 rounded">./start-watcher.sh</code>
+              <strong>First time?</strong> Double-click <code className="bg-yellow-100 px-1 rounded">Install-Auto-Watcher.command</code> to set up automatic scraping (one-time setup)
             </p>
           </div>
         )}
@@ -345,7 +353,7 @@ export default function LiveScrapingPage() {
                     ⏳ Waiting for scraper to pick up this job...
                   </p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Start the watcher: <code className="bg-yellow-100 px-1 rounded">Start-Watcher.command</code> (Mac) or <code className="bg-yellow-100 px-1 rounded">./start-watcher.sh</code>
+                    Install auto-watcher: <code className="bg-yellow-100 px-1 rounded">Install-Auto-Watcher.command</code> (one-time setup, then it works automatically)
                   </p>
                 </div>
               )}
