@@ -111,6 +111,44 @@ export default function LiveScrapingPage() {
     }
   }
 
+  async function deleteSession(sessionId: number) {
+    if (!confirm(`Delete session #${sessionId}?`)) return;
+
+    try {
+      const response = await fetch(`/api/scraping/sessions/cancel?id=${sessionId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Refresh sessions
+        fetchSessions();
+        // Clear current session if it was deleted
+        if (currentSession?.id === sessionId) {
+          setCurrentSession(null);
+          setLogs([]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    }
+  }
+
+  async function cancelAllPending() {
+    if (!confirm('Cancel all pending sessions?')) return;
+
+    try {
+      const response = await fetch('/api/scraping/sessions/cancel', {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchSessions();
+      }
+    } catch (error) {
+      console.error('Failed to cancel sessions:', error);
+    }
+  }
+
   async function startScraping() {
     if (!location.trim()) {
       alert('Please enter a location');
@@ -410,37 +448,68 @@ export default function LiveScrapingPage() {
 
       {/* Recent Sessions */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Recent Sessions</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Recent Sessions</h2>
+          {sessions.filter(s => s.status === 'pending').length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={cancelAllPending}
+              className="text-red-600 hover:text-red-700"
+            >
+              Clear All Pending
+            </Button>
+          )}
+        </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sessions.slice(0, 6).map((session) => (
             <Card
               key={session.id}
-              className={`p-4 cursor-pointer transition-all ${
+              className={`p-4 transition-all ${
                 currentSession?.id === session.id
                   ? 'ring-2 ring-blue-500'
                   : 'hover:shadow-md'
               }`}
-              onClick={() => {
-                setCurrentSession(session);
-                setLogs([]); // Clear logs when switching sessions
-              }}
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-semibold">Session #{session.id}</div>
-                  <div className="text-sm text-gray-600 mt-1">{session.location}</div>
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  setCurrentSession(session);
+                  setLogs([]); // Clear logs when switching sessions
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-semibold">Session #{session.id}</div>
+                    <div className="text-sm text-gray-600 mt-1">{session.location}</div>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(
+                      session.status
+                    )}`}
+                  >
+                    {session.status}
+                  </span>
                 </div>
-                <span
-                  className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(
-                    session.status
-                  )}`}
-                >
-                  {session.status}
-                </span>
+                <div className="mt-3 space-y-1 text-sm text-gray-600">
+                  <div>Leads: {session.totalLeadsFound}</div>
+                  <div>{new Date(session.startedAt).toLocaleDateString()}</div>
+                </div>
               </div>
-              <div className="mt-3 space-y-1 text-sm text-gray-600">
-                <div>Leads: {session.totalLeadsFound}</div>
-                <div>{new Date(session.startedAt).toLocaleDateString()}</div>
+
+              {/* Action Buttons */}
+              <div className="mt-3 pt-3 border-t border-gray-200 flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteSession(session.id);
+                  }}
+                  className="flex-1 text-red-600 hover:text-red-700"
+                >
+                  Delete
+                </Button>
               </div>
             </Card>
           ))}
