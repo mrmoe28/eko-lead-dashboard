@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { leads, scrapingSessions } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -49,7 +49,40 @@ export async function POST(request: Request) {
       scrapedAt: new Date(),
     };
 
-    // Insert lead
+    // DEDUPLICATION: Check if lead already exists
+    // We check by originalPostUrl (most reliable) or permit number (for permits)
+    const duplicateConditions = [];
+
+    if (dbLead.originalPostUrl) {
+      duplicateConditions.push(eq(leads.originalPostUrl, dbLead.originalPostUrl));
+    }
+
+    if (dbLead.permitNumber) {
+      duplicateConditions.push(eq(leads.permitNumber, dbLead.permitNumber));
+    }
+
+    // If we have phone AND it's not a generic message, check by phone
+    if (dbLead.phone && !dbLead.phone.includes('Forum DM') && !dbLead.phone.includes('Contact via')) {
+      duplicateConditions.push(eq(leads.phone, dbLead.phone));
+    }
+
+    // Check for duplicates
+    if (duplicateConditions.length > 0) {
+      const existingLead = await db.query.leads.findFirst({
+        where: or(...duplicateConditions),
+      });
+
+      if (existingLead) {
+        console.log(`⚠️  Duplicate lead detected: ${dbLead.name} (${dbLead.source})`);
+        return NextResponse.json({
+          success: true,
+          duplicate: true,
+          message: "Lead already exists in database"
+        });
+      }
+    }
+
+    // Insert lead (not a duplicate)
     await db.insert(leads).values(dbLead);
 
     // Update session total leads count
