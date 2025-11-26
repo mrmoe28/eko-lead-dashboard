@@ -181,13 +181,43 @@ export default function LiveScrapingPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Live Scraping</h1>
         <p className="text-gray-600 mt-1">
-          Start scraping and watch real-time progress
+          Monitor real-time solar lead scraping across multiple sources
         </p>
       </div>
 
+      {/* Quick Start Guide */}
+      <Card className="p-6 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white text-xl shrink-0">
+            ✓
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold mb-3">🚀 Quick Start</h2>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="space-y-2">
+                <p className="font-semibold text-green-900">Option 1: One-Click Trigger</p>
+                <ol className="list-decimal list-inside space-y-1 text-gray-700 ml-2">
+                  <li>Open terminal in <code className="bg-green-100 px-1 rounded text-xs">solar-data-extractor</code></li>
+                  <li>Run: <code className="bg-green-100 px-2 py-1 rounded">npm run watch</code></li>
+                  <li>Click "Start Scraping" below</li>
+                </ol>
+              </div>
+              <div className="space-y-2">
+                <p className="font-semibold text-green-900">Option 2: Manual Run</p>
+                <ol className="list-decimal list-inside space-y-1 text-gray-700 ml-2">
+                  <li>Open terminal in <code className="bg-green-100 px-1 rounded text-xs">solar-data-extractor</code></li>
+                  <li>Run: <code className="bg-green-100 px-2 py-1 rounded">npm run scrape Georgia</code></li>
+                  <li>Watch progress below</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
       {/* Start Scraping Card */}
       <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-        <h2 className="text-xl font-semibold mb-4">🚀 Start New Scraping Session</h2>
+        <h2 className="text-xl font-semibold mb-4">🎯 Trigger Scraping Job</h2>
         <div className="flex gap-3">
           <Input
             placeholder="Enter location (e.g., Georgia, Florida)"
@@ -204,7 +234,7 @@ export default function LiveScrapingPage() {
             {isStarting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Starting...
+                Creating Job...
               </>
             ) : (
               <>
@@ -218,6 +248,16 @@ export default function LiveScrapingPage() {
           <p className="text-sm text-gray-600 mt-2">
             ⚠️ A scraping session is already running. Wait for it to complete.
           </p>
+        )}
+        {currentSession?.status === 'pending' && (
+          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800 font-medium">
+              ⏳ Job created! Waiting for job watcher to pick it up...
+            </p>
+            <p className="text-xs text-yellow-700 mt-1">
+              Make sure <code className="bg-yellow-100 px-1 rounded">npm run watch</code> is running in solar-data-extractor folder
+            </p>
+          </div>
         )}
       </Card>
 
@@ -399,28 +439,27 @@ export default function LiveScrapingPage() {
         </div>
       </div>
 
-      {/* Info Card */}
-      <Card className="p-6 bg-blue-50 border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-2">🚀 Two Ways to Start Scraping</h3>
-
-        <div className="space-y-4 text-sm text-blue-800">
-          <div>
-            <p className="font-semibold mb-2">Option 1: One-Click Dashboard Trigger (Recommended)</p>
-            <ol className="list-decimal list-inside space-y-1 ml-2">
-              <li>Start the job watcher on your local machine: <code className="bg-blue-100 px-2 py-1 rounded">node watch-jobs.js</code></li>
-              <li>Click "Start Scraping" above with your desired location</li>
-              <li>Watch real-time progress as the scraper automatically starts</li>
-            </ol>
-          </div>
-
-          <div>
-            <p className="font-semibold mb-2">Option 2: Manual CLI</p>
-            <ol className="list-decimal list-inside space-y-1 ml-2">
-              <li>Run directly: <code className="bg-blue-100 px-2 py-1 rounded">node scrape-leads.js Georgia</code></li>
-              <li>Watch real-time progress here in the dashboard</li>
-            </ol>
-          </div>
-        </div>
+      {/* Tips Card */}
+      <Card className="p-6 bg-gray-50 border-gray-200">
+        <h3 className="font-semibold text-gray-900 mb-3">💡 Tips</h3>
+        <ul className="space-y-2 text-sm text-gray-700">
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <span>The job watcher polls every 5 seconds for new jobs from the dashboard</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <span>You can run multiple scrapers manually if needed: <code className="bg-gray-200 px-1 rounded text-xs">npm run scrape Florida</code></span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <span>All leads are automatically saved to the database and appear in the Leads Library</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <span>Sessions are tracked in Recent Sessions below for historical reference</span>
+          </li>
+        </ul>
       </Card>
     </div>
   );
