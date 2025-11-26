@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ const SCRAPING_SOURCES = [
 ];
 
 export default function LiveScrapingPage() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<ScrapingSession[]>([]);
   const [currentSession, setCurrentSession] = useState<ScrapingSession | null>(null);
   const [logs, setLogs] = useState<ScrapingLog[]>([]);
@@ -53,22 +55,30 @@ export default function LiveScrapingPage() {
 
   // Connect to SSE stream when current session changes
   useEffect(() => {
-    if (!currentSession || currentSession.status !== 'running') {
+    // Don't connect if no session or session is not running/pending
+    if (!currentSession || (currentSession.status !== 'running' && currentSession.status !== 'pending')) {
       setIsConnected(false);
       return;
     }
 
+    console.log(`[SSE] Connecting to stream for session #${currentSession.id}`);
     const eventSource = new EventSource(`/api/scraping/stream/${currentSession.id}`);
 
     eventSource.onopen = () => {
+      console.log(`[SSE] Connected to session #${currentSession.id}`);
       setIsConnected(true);
     };
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log(`[SSE] Received:`, data);
 
       if (data.type === 'logs') {
-        setLogs((prev) => [...prev, ...data.data]);
+        setLogs((prev) => {
+          const newLogs = [...prev, ...data.data];
+          console.log(`[SSE] Total logs: ${newLogs.length}`);
+          return newLogs;
+        });
         // Auto-scroll console to bottom
         setTimeout(() => {
           if (consoleRef.current) {
@@ -84,7 +94,8 @@ export default function LiveScrapingPage() {
       }
     };
 
-    eventSource.onerror = () => {
+    eventSource.onerror = (error) => {
+      console.error(`[SSE] Error:`, error);
       setIsConnected(false);
       eventSource.close();
     };
@@ -409,34 +420,45 @@ export default function LiveScrapingPage() {
       )}
 
       {/* Console */}
-      <Card className="overflow-hidden">
-        <div className="bg-gray-800 px-4 py-3 flex items-center gap-2 border-b border-gray-700">
+      <Card className="overflow-hidden rounded-xl border-0 shadow-lg">
+        <div className="bg-black px-4 py-3 flex items-center gap-2 border-b border-gray-800 rounded-t-xl">
           <Terminal className="w-4 h-4 text-green-400" />
-          <span className="text-sm font-medium text-white">Console Output</span>
+          <span className="text-sm font-medium text-gray-200">Console Output</span>
           {logs.length > 0 && (
-            <span className="ml-auto text-xs text-gray-400">{logs.length} messages</span>
+            <span className="ml-auto text-xs text-gray-500">{logs.length} messages</span>
+          )}
+          {isConnected && (
+            <div className="flex items-center gap-2 ml-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-400">Live</span>
+            </div>
           )}
         </div>
         <div
           ref={consoleRef}
-          className="bg-gray-900 p-4 h-96 overflow-y-auto font-mono text-sm"
+          className="bg-black p-4 h-96 overflow-y-auto font-mono text-sm rounded-b-xl"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#374151 #000000'
+          }}
         >
           {logs.length === 0 ? (
-            <div className="text-gray-500 text-center py-8">
-              No activity yet. Start a scraping session to see real-time logs.
+            <div className="text-gray-600 text-center py-8">
+              <Terminal className="w-12 h-12 mx-auto mb-3 text-gray-700" />
+              <p>No activity yet. Start a scraping session to see real-time logs.</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {logs.map((log) => (
-                <div key={log.id} className="flex items-start gap-2">
-                  <span className="text-gray-500 shrink-0">
+                <div key={log.id} className="flex items-start gap-2 text-sm leading-relaxed">
+                  <span className="text-gray-600 shrink-0 font-normal">
                     [{formatTimestamp(log.timestamp)}]
                   </span>
                   <span className="shrink-0">{getLogStatusIcon(log.status)}</span>
                   <span className="text-gray-300">
-                    <span className="text-blue-400">{log.source}:</span> {log.message}
+                    <span className="text-cyan-400 font-semibold">{log.source}:</span> {log.message}
                     {log.leadCount > 0 && (
-                      <span className="text-green-400"> ({log.leadCount} leads)</span>
+                      <span className="text-green-400 font-semibold"> ({log.leadCount} leads)</span>
                     )}
                   </span>
                 </div>
@@ -477,6 +499,12 @@ export default function LiveScrapingPage() {
                   setCurrentSession(session);
                   setLogs([]); // Clear logs when switching sessions
                 }}
+                onDoubleClick={() => {
+                  // Navigate to session detail page on double-click
+                  if (session.status === 'completed') {
+                    router.push(`/scraping/${session.id}`);
+                  }
+                }}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -494,6 +522,11 @@ export default function LiveScrapingPage() {
                 <div className="mt-3 space-y-1 text-sm text-gray-600">
                   <div>Leads: {session.totalLeadsFound}</div>
                   <div>{new Date(session.startedAt).toLocaleDateString()}</div>
+                  {session.status === 'completed' && (
+                    <div className="text-xs text-blue-600 mt-2">
+                      Double-click to view details
+                    </div>
+                  )}
                 </div>
               </div>
 
