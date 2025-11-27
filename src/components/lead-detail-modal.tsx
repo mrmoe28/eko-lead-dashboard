@@ -60,8 +60,12 @@ export function LeadDetailModal({ lead, isOpen, onClose, onDelete }: LeadDetailM
       onClose={onClose}
       size="3xl"
       scrollBehavior="inside"
+      backdrop="blur"
+      classNames={{
+        backdrop: "bg-black/50 backdrop-blur-sm"
+      }}
     >
-      <ModalContent>
+      <ModalContent className="bg-white dark:bg-gray-900">
         <ModalHeader className="flex flex-col gap-1">
           <div className="flex items-start justify-between w-full">
             <div>
