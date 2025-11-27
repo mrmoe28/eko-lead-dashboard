@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Youtube, RefreshCw, Send, SkipForward, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Youtube, RefreshCw, Send, SkipForward, Loader2, CheckCircle2, XCircle, LayoutGrid, Table, List } from "lucide-react";
+import { YouTubeLeadsTable } from "@/components/youtube-leads-table";
+import { YouTubeLeadsList } from "@/components/youtube-leads-list";
+import { cn } from "@/lib/utils";
+
+type ViewMode = "card" | "list" | "table";
 
 interface YouTubeLead {
   id: string;
@@ -29,6 +34,7 @@ export default function YouTubeLeadsPage() {
   const [leads, setLeads] = useState<YouTubeLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("card");
 
   useEffect(() => {
     fetchLeads();
@@ -197,226 +203,316 @@ export default function YouTubeLeadsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Youtube className="h-8 w-8 text-red-600" />
-            YouTube Lead Replies
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Review and post AI-generated replies to YouTube comments
-          </p>
-        </div>
-        <Button onClick={fetchLeads} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+    <div className="relative">
+      {/* Animated Background Mesh Gradient */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-red-600/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute top-[40%] -left-[15%] w-[700px] h-[700px] bg-purple-600/20 rounded-full blur-3xl animate-float-slow" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-[20%] right-[20%] w-[650px] h-[650px] bg-pink-600/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '5s' }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-slate-950/50 to-black" />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="text-sm text-gray-600">Total Leads</div>
-          <div className="text-2xl font-bold">{leads.length}</div>
-        </Card>
-        <Card className="p-4 bg-blue-50 border-blue-200">
-          <div className="text-sm text-blue-600">Pending</div>
-          <div className="text-2xl font-bold text-blue-700">{activeLeads.length}</div>
-        </Card>
-        <Card className="p-4 bg-green-50 border-green-200">
-          <div className="text-sm text-green-600">Posted</div>
-          <div className="text-2xl font-bold text-green-700">{postedCount}</div>
-        </Card>
-        <Card className="p-4 bg-gray-50 border-gray-200">
-          <div className="text-sm text-gray-600">Skipped</div>
-          <div className="text-2xl font-bold text-gray-700">{skippedCount}</div>
-        </Card>
-      </div>
+      <div className="max-w-7xl mx-auto space-y-6 relative z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-3">
+              <Youtube className="h-8 w-8 text-red-500" />
+              YouTube Lead Replies
+            </h1>
+            <p className="text-gray-400 mt-1">
+              Review and post AI-generated replies to YouTube comments
+            </p>
+          </div>
 
-      {/* Lead Cards */}
-      {activeLeads.length === 0 ? (
-        <Card className="p-12 text-center">
-          <CheckCircle2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">All Done!</h2>
-          <p className="text-gray-600 mb-4">
-            You've reviewed all YouTube leads. Posted: {postedCount}, Skipped: {skippedCount}
-          </p>
-          <Button onClick={fetchLeads} variant="outline">
-            Check for New Leads
-          </Button>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          {activeLeads.map((lead) => (
-            <Card key={lead.id} className="p-6">
-              {/* Priority Badge */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      lead.priority === 'Hot'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-orange-100 text-orange-700'
-                    }`}
-                  >
-                    {lead.priority} Lead
-                  </span>
-                  <span className="text-sm text-gray-600">Score: {lead.score}</span>
-                  <span className="text-sm text-gray-600">Intent: {lead.intent}</span>
-                </div>
-              </div>
-
-              {/* User Info */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <a
-                    href={lead.profileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-blue-600 hover:underline"
-                  >
-                    {lead.name}
-                  </a>
-                  <span className="text-gray-500">•</span>
-                  <span className="text-sm text-gray-600">{lead.location}</span>
-                  <span className="text-gray-500">•</span>
-                  <span className="text-sm text-gray-500">
-                    {new Date(lead.timestamp).toLocaleDateString()}
-                  </span>
-                </div>
-                <a
-                  href={lead.postUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                >
-                  <Youtube className="h-3 w-3" />
-                  View on YouTube
-                </a>
-              </div>
-
-              {/* Original Comment */}
-              <div className="mb-4 bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1 font-semibold">Their Comment:</p>
-                <p className="text-gray-900">{lead.message}</p>
-              </div>
-
-              {/* Generated Reply */}
-              {lead.generatedReply && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600 mb-2 font-semibold">Your Reply:</p>
-                  <textarea
-                    value={lead.generatedReply}
-                    onChange={(e) => updateReply(lead.id, e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={lead.status === 'posting'}
-                  />
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                {lead.status === 'pending' && (
-                  <>
-                    <Button
-                      onClick={() => generateReply(lead.id)}
-                      className="flex-1"
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Generate AI Reply
-                    </Button>
-                    <Button
-                      onClick={() => skipLead(lead.id)}
-                      variant="outline"
-                    >
-                      <SkipForward className="h-4 w-4 mr-2" />
-                      Skip
-                    </Button>
-                  </>
+          <div className="flex items-center gap-3">
+            {/* View Mode Controls */}
+            <div className="flex items-center gap-1 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-1 rounded-lg">
+              <button
+                onClick={() => setViewMode("card")}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200",
+                  viewMode === "card"
+                    ? "bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg shadow-red-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-slate-700"
                 )}
-
-                {lead.status === 'generating' && (
-                  <Button disabled className="flex-1">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
-                  </Button>
+                title="Card View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">Card</span>
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200",
+                  viewMode === "list"
+                    ? "bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg shadow-red-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-slate-700"
                 )}
-
-                {lead.status === 'ready' && (
-                  <>
-                    <Button
-                      onClick={() => postReply(lead.id)}
-                      className="flex-1 bg-green-600 hover:bg-green-700"
-                    >
-                      <Send className="h-4 w-4 mr-2" />
-                      Approve & Post to YouTube
-                    </Button>
-                    <Button
-                      onClick={() => generateReply(lead.id)}
-                      variant="outline"
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Regenerate
-                    </Button>
-                    <Button
-                      onClick={() => skipLead(lead.id)}
-                      variant="outline"
-                    >
-                      <SkipForward className="h-4 w-4 mr-2" />
-                      Skip
-                    </Button>
-                  </>
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200",
+                  viewMode === "table"
+                    ? "bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg shadow-red-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-slate-700"
                 )}
+                title="Table View"
+              >
+                <Table className="w-4 h-4" />
+                <span className="hidden sm:inline">Table</span>
+              </button>
+            </div>
 
-                {lead.status === 'posting' && (
-                  <Button disabled className="flex-1">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Posting to YouTube...
-                  </Button>
-                )}
-              </div>
-
-              {/* Posted Success */}
-              {lead.status === 'posted' && lead.youtubeUrl && (
-                <div className="mt-4 space-y-4">
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-green-700 mb-2">
-                      <CheckCircle2 className="h-5 w-5" />
-                      <span className="font-semibold">Posted Successfully!</span>
-                    </div>
-                    <a
-                      href={lead.youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
-                    >
-                      View your reply on YouTube
-                    </a>
-                  </div>
-
-                  {/* Embedded YouTube Video */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-3 font-semibold">Your Reply on YouTube:</p>
-                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        src={`https://www.youtube.com/embed/${extractVideoId(lead.postUrl)}?start=0`}
-                        className="absolute top-0 left-0 w-full h-full rounded-lg"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      💡 Your reply is now visible in the comments section of this video
-                    </p>
-                  </div>
-                </div>
-              )}
-            </Card>
-          ))}
+            <Button
+              onClick={fetchLeads}
+              variant="outline"
+              className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
-      )}
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 shadow-xl shadow-black/50">
+            <div className="text-sm text-gray-400">Total Leads</div>
+            <div className="text-2xl font-bold text-white">{leads.length}</div>
+          </Card>
+          <Card className="p-4 bg-slate-800/50 backdrop-blur-xl border-blue-500/30 shadow-xl shadow-black/50 hover:border-blue-500/50 transition-all">
+            <div className="text-sm text-blue-400">Pending</div>
+            <div className="text-2xl font-bold text-blue-400">{activeLeads.length}</div>
+          </Card>
+          <Card className="p-4 bg-slate-800/50 backdrop-blur-xl border-green-500/30 shadow-xl shadow-black/50 hover:border-green-500/50 transition-all">
+            <div className="text-sm text-green-400">Posted</div>
+            <div className="text-2xl font-bold text-green-400">{postedCount}</div>
+          </Card>
+          <Card className="p-4 bg-slate-800/50 backdrop-blur-xl border-gray-500/30 shadow-xl shadow-black/50 hover:border-gray-500/50 transition-all">
+            <div className="text-sm text-gray-400">Skipped</div>
+            <div className="text-2xl font-bold text-gray-400">{skippedCount}</div>
+          </Card>
+        </div>
+
+        {/* Lead Views */}
+        {activeLeads.length === 0 ? (
+          <Card className="p-12 text-center bg-slate-800/50 backdrop-blur-xl border-slate-700/50 shadow-xl shadow-black/50">
+            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">All Done!</h2>
+            <p className="text-gray-400 mb-4">
+              You've reviewed all YouTube leads. Posted: {postedCount}, Skipped: {skippedCount}
+            </p>
+            <Button
+              onClick={fetchLeads}
+              variant="outline"
+              className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+            >
+              Check for New Leads
+            </Button>
+          </Card>
+        ) : (
+          <>
+            {viewMode === "list" && (
+              <YouTubeLeadsList
+                leads={activeLeads}
+                onGenerateReply={generateReply}
+                onSkip={skipLead}
+                onPostReply={postReply}
+                onUpdateReply={updateReply}
+              />
+            )}
+
+            {viewMode === "table" && (
+              <YouTubeLeadsTable
+                leads={activeLeads}
+                onGenerateReply={generateReply}
+                onSkip={skipLead}
+                onPostReply={postReply}
+              />
+            )}
+
+            {viewMode === "card" && (
+              <div className="space-y-6">
+                {activeLeads.map((lead) => (
+                  <Card key={lead.id} className="p-6 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 shadow-xl shadow-black/50 hover:border-slate-600/50 transition-all">
+                    {/* Priority Badge */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                            lead.priority === 'Hot'
+                              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                              : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                          }`}
+                        >
+                          {lead.priority} Lead
+                        </span>
+                        <span className="text-sm text-gray-400">Score: {lead.score}</span>
+                        <span className="text-sm text-gray-400">Intent: {lead.intent}</span>
+                      </div>
+                    </div>
+
+                    {/* User Info */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <a
+                          href={lead.profileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-blue-400 hover:text-blue-300"
+                        >
+                          {lead.name}
+                        </a>
+                        <span className="text-gray-500">•</span>
+                        <span className="text-sm text-gray-400">{lead.location}</span>
+                        <span className="text-gray-500">•</span>
+                        <span className="text-sm text-gray-500">
+                          {new Date(lead.timestamp).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <a
+                        href={lead.postUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                      >
+                        <Youtube className="h-3 w-3" />
+                        View on YouTube
+                      </a>
+                    </div>
+
+                    {/* Original Comment */}
+                    <div className="mb-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                      <p className="text-sm text-gray-400 mb-1 font-semibold">Their Comment:</p>
+                      <p className="text-gray-200">{lead.message}</p>
+                    </div>
+
+                    {/* Generated Reply */}
+                    {lead.generatedReply && (
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-400 mb-2 font-semibold">Your Reply:</p>
+                        <textarea
+                          value={lead.generatedReply}
+                          onChange={(e) => updateReply(lead.id, e.target.value)}
+                          className="w-full p-3 bg-slate-900/50 border border-slate-600 text-white rounded-lg min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          disabled={lead.status === 'posting'}
+                        />
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-3">
+                      {lead.status === 'pending' && (
+                        <>
+                          <Button
+                            onClick={() => generateReply(lead.id)}
+                            className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300"
+                          >
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Generate AI Reply
+                          </Button>
+                          <Button
+                            onClick={() => skipLead(lead.id)}
+                            variant="outline"
+                            className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                          >
+                            <SkipForward className="h-4 w-4 mr-2" />
+                            Skip
+                          </Button>
+                        </>
+                      )}
+
+                      {lead.status === 'generating' && (
+                        <Button disabled className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500">
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </Button>
+                      )}
+
+                      {lead.status === 'ready' && (
+                        <>
+                          <Button
+                            onClick={() => postReply(lead.id)}
+                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300"
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            Approve & Post to YouTube
+                          </Button>
+                          <Button
+                            onClick={() => generateReply(lead.id)}
+                            variant="outline"
+                            className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                          >
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Regenerate
+                          </Button>
+                          <Button
+                            onClick={() => skipLead(lead.id)}
+                            variant="outline"
+                            className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                          >
+                            <SkipForward className="h-4 w-4 mr-2" />
+                            Skip
+                          </Button>
+                        </>
+                      )}
+
+                      {lead.status === 'posting' && (
+                        <Button disabled className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500">
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Posting to YouTube...
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Posted Success */}
+                    {lead.status === 'posted' && lead.youtubeUrl && (
+                      <div className="mt-4 space-y-4">
+                        <div className="p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
+                          <div className="flex items-center gap-2 text-green-400 mb-2">
+                            <CheckCircle2 className="h-5 w-5" />
+                            <span className="font-semibold">Posted Successfully!</span>
+                          </div>
+                          <a
+                            href={lead.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            View your reply on YouTube
+                          </a>
+                        </div>
+
+                        {/* Embedded YouTube Video */}
+                        <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                          <p className="text-sm text-gray-400 mb-3 font-semibold">Your Reply on YouTube:</p>
+                          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                            <iframe
+                              src={`https://www.youtube.com/embed/${extractVideoId(lead.postUrl)}?start=0`}
+                              className="absolute top-0 left-0 w-full h-full rounded-lg"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            💡 Your reply is now visible in the comments section of this video
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
