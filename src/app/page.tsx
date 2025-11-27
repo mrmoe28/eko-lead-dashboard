@@ -117,7 +117,7 @@ export default function DashboardPage() {
       {/* Header */}
       <motion.div variants={fadeIn} className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             Dashboard
           </h1>
           <p className="text-gray-400 mt-1">Welcome back! Here's your lead overview.</p>
