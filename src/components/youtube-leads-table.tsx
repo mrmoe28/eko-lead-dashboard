@@ -91,7 +91,7 @@ export function YouTubeLeadsTable({ leads, onGenerateReply, onSkip, onPostReply 
                 </td>
                 <td className="px-4 py-3">
                   <div className="max-w-md">
-                    <p className="text-sm text-gray-300 line-clamp-2">{lead.message}</p>
+                    <p className="text-sm text-white line-clamp-2">{lead.message}</p>
                     <a
                       href={lead.postUrl}
                       target="_blank"

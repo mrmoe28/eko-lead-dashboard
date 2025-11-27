@@ -390,7 +390,7 @@ export default function YouTubeLeadsPage() {
                     {/* Original Comment */}
                     <div className="mb-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
                       <p className="text-sm text-gray-400 mb-1 font-semibold">Their Comment:</p>
-                      <p className="text-gray-200">{lead.message}</p>
+                      <p className="text-white">{lead.message}</p>
                     </div>
 
                     {/* Generated Reply */}

@@ -75,7 +75,7 @@ export function YouTubeLeadsList({ leads, onGenerateReply, onSkip, onPostReply, 
 
               {/* Comment */}
               <div className="bg-slate-900/50 p-3 rounded-lg mb-2">
-                <p className="text-sm text-gray-300 line-clamp-2">{lead.message}</p>
+                <p className="text-sm text-white line-clamp-2">{lead.message}</p>
               </div>
 
               {/* Generated Reply */}
