@@ -132,7 +132,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <motion.div variants={fadeIn} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-blue-500/20 hover:border-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-blue-500/20 shadow-xl shadow-black/50 hover:border-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Total Leads</p>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
           </p>
         </Card>
 
-        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-red-500/20 hover:border-red-500/40 hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-red-500/20 shadow-xl shadow-black/50 hover:border-red-500/40 hover:shadow-2xl hover:shadow-red-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Hot Leads</p>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-500 mt-4">Score 80+ ready to convert</p>
         </Card>
 
-        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-green-500/20 hover:border-green-500/40 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-green-500/20 shadow-xl shadow-black/50 hover:border-green-500/40 hover:shadow-2xl hover:shadow-green-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Est. Revenue</p>
@@ -175,7 +175,7 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-500 mt-4">15% close rate estimate</p>
         </Card>
 
-        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-purple-500/20 hover:border-purple-500/40 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-purple-500/20 shadow-xl shadow-black/50 hover:border-purple-500/40 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Conversion Rate</p>
@@ -193,10 +193,10 @@ export default function DashboardPage() {
 
       {/* Lead Distribution */}
       <motion.div variants={fadeIn}>
-        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300">
           <h2 className="text-xl font-semibold mb-4 text-white">Lead Distribution</h2>
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-red-500/30 rounded-lg hover:border-red-500/50 transition-all">
+          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-red-500/30 rounded-lg shadow-lg shadow-black/40 hover:border-red-500/50 hover:shadow-xl hover:shadow-red-500/20 transition-all">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-red-300">Hot Leads</span>
               <span className="text-2xl font-bold text-red-400">{hotLeads.length}</span>
@@ -212,7 +212,7 @@ export default function DashboardPage() {
             <p className="text-xs text-red-300 mt-2">Score 80+</p>
           </div>
 
-          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-orange-500/30 rounded-lg hover:border-orange-500/50 transition-all">
+          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-orange-500/30 rounded-lg shadow-lg shadow-black/40 hover:border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/20 transition-all">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-orange-300">Warm Leads</span>
               <span className="text-2xl font-bold text-orange-400">{warmLeads.length}</span>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
             <p className="text-xs text-orange-300 mt-2">Score 60-79</p>
           </div>
 
-          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-blue-500/30 rounded-lg hover:border-blue-500/50 transition-all">
+          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-blue-500/30 rounded-lg shadow-lg shadow-black/40 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/20 transition-all">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-blue-300">Cold Leads</span>
               <span className="text-2xl font-bold text-blue-400">{coldLeads.length}</span>
@@ -306,7 +306,7 @@ export default function DashboardPage() {
         </div>
 
         {recentLeads.length === 0 ? (
-          <Card className="p-12 text-center bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
+          <Card className="p-12 text-center bg-slate-800/50 backdrop-blur-xl border-slate-700/50 shadow-xl shadow-black/50">
             <p className="text-gray-400">No leads yet. Start scraping to find leads!</p>
             <Link href="/scraping">
               <Button className="mt-4 gap-2">

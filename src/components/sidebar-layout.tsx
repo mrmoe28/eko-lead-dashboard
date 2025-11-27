@@ -63,7 +63,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full bg-slate-900/80 backdrop-blur-xl border-r border-slate-700/60 shadow-2xl shadow-blue-900/20 transition-all duration-300 ease-in-out lg:translate-x-0",
+          "fixed top-0 left-0 z-50 h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 backdrop-blur-xl border-r border-slate-700/60 shadow-2xl shadow-black/50 transition-all duration-300 ease-in-out lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "lg:w-20" : "lg:w-64",
           "w-64" // Always full width on mobile
