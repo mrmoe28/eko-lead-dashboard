@@ -35,7 +35,9 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
     ? `$${(lead.revenueMin / 1000).toFixed(0)}k-$${(lead.revenueMax / 1000).toFixed(0)}k`
     : "Not specified";
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+
     if (!confirm(`Are you sure you want to delete lead "${lead.name}"?`)) {
       return;
     }

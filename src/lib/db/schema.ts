@@ -59,8 +59,25 @@ export const leads = pgTable('leads', {
   message: text('message'),
   intent: text('intent'),
   scrapedAt: timestamp('scraped_at'),
+  // YouTube reply fields
+  youtubeReplyText: text('youtube_reply_text'),
+  youtubeReplyStatus: text('youtube_reply_status').default('pending'), // 'pending', 'approved', 'posted', 'skipped'
+  youtubePostedAt: timestamp('youtube_posted_at'),
+  youtubeCommentId: text('youtube_comment_id'), // ID of the comment we replied to
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Contacted Leads - Track all leads we've contacted on YouTube
+export const contactedLeads = pgTable('contacted_leads', {
+  id: serial('id').primaryKey(),
+  commentId: text('comment_id').unique().notNull(),
+  leadName: text('lead_name'),
+  priority: text('priority'),
+  intent: text('intent'),
+  replyText: text('reply_text').notNull(),
+  videoUrl: text('video_url'),
+  contactedAt: timestamp('contacted_at').defaultNow().notNull(),
 });
 
 // Type exports
@@ -72,3 +89,6 @@ export type NewScrapingLog = typeof scrapingLogs.$inferInsert;
 
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
+
+export type ContactedLead = typeof contactedLeads.$inferSelect;
+export type NewContactedLead = typeof contactedLeads.$inferInsert;
