@@ -69,12 +69,12 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
       onPress={() => onViewDetails(lead)}
     >
       <CardHeader className="flex flex-col items-start gap-2 pb-2">
-        <div className="flex w-full items-start justify-between">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-lg font-semibold">{lead.name}</h3>
+        <div className="flex w-full items-start justify-between gap-2">
+          <div className="flex flex-col gap-1 min-w-0 flex-1">
+            <h3 className="text-lg font-semibold truncate">{lead.name}</h3>
             <div className="flex items-center gap-1 text-sm text-gray-600">
-              <MapPin className="h-4 w-4" />
-              {lead.location}
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span className="truncate">{lead.location}</span>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
@@ -114,7 +114,7 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
 
         {lead.whyHot && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
-            <p className="text-xs text-amber-800">
+            <p className="text-xs text-amber-800 line-clamp-2 break-words">
               <span className="font-semibold">Why Hot:</span> {lead.whyHot}
             </p>
           </div>
@@ -122,16 +122,16 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
 
         {lead.actionRequired && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-2">
-            <p className="text-xs text-red-800">
+            <p className="text-xs text-red-800 line-clamp-2 break-words">
               <span className="font-semibold">Action Required:</span> {lead.actionRequired}
             </p>
           </div>
         )}
 
-        <div className="flex items-center gap-4 pt-2 border-t">
+        <div className="flex items-center gap-2 pt-2 border-t flex-wrap">
           <div className="flex items-center gap-1 text-sm">
-            <DollarSign className="h-4 w-4 text-green-600" />
-            <span className="font-medium">{revenue}</span>
+            <DollarSign className="h-4 w-4 text-green-600 shrink-0" />
+            <span className="font-medium whitespace-nowrap">{revenue}</span>
           </div>
 
           {lead.phone && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -11,7 +11,9 @@ import {
   Settings,
   Menu,
   X,
-  Youtube
+  Youtube,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +33,22 @@ interface SidebarLayoutProps {
 export function SidebarLayout({ children }: SidebarLayoutProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Load collapse state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebar-collapsed');
+    if (savedState !== null) {
+      setIsCollapsed(savedState === 'true');
+    }
+  }, []);
+
+  // Save collapse state to localStorage
+  const toggleCollapse = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem('sidebar-collapsed', String(newState));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,18 +63,22 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out lg:translate-x-0",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed top-0 left-0 z-50 h-full bg-white border-r border-gray-200 transition-all duration-300 ease-in-out lg:translate-x-0",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+          isCollapsed ? "lg:w-20" : "lg:w-64",
+          "w-64" // Always full width on mobile
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className={cn("flex items-center gap-2 transition-all", isCollapsed && "lg:justify-center lg:w-full")}>
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0">
                 <span className="text-white font-bold text-sm">EL</span>
               </div>
-              <span className="font-semibold text-gray-900">Eko Leads</span>
+              <span className={cn("font-semibold text-gray-900 whitespace-nowrap transition-opacity", isCollapsed && "lg:hidden")}>
+                Eko Leads
+              </span>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -79,27 +101,52 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                     "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
                       ? "bg-blue-50 text-blue-700"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                    isCollapsed && "lg:justify-center"
                   )}
+                  title={isCollapsed ? item.name : undefined}
                 >
-                  <item.icon className="w-5 h-5" />
-                  {item.name}
+                  <item.icon className="w-5 h-5 shrink-0" />
+                  <span className={cn("whitespace-nowrap transition-opacity", isCollapsed && "lg:hidden")}>
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}
           </nav>
 
+          {/* Collapse Toggle (Desktop only) */}
+          <div className="hidden lg:block border-t border-gray-200 p-2">
+            <button
+              onClick={toggleCollapse}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {isCollapsed ? (
+                <ChevronRight className="w-5 h-5" />
+              ) : (
+                <>
+                  <ChevronLeft className="w-5 h-5" />
+                  <span className="font-medium">Collapse</span>
+                </>
+              )}
+            </button>
+          </div>
+
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="text-xs text-gray-500 text-center">
+          <div className={cn("p-4 border-t border-gray-200 transition-all", isCollapsed && "lg:px-2")}>
+            <div className={cn("text-xs text-gray-500 text-center", isCollapsed && "lg:hidden")}>
               Eko Lead Generator v1.0
             </div>
+            {isCollapsed && (
+              <div className="hidden lg:block text-xs text-gray-500 text-center">v1.0</div>
+            )}
           </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className={cn("transition-all duration-300", isCollapsed ? "lg:pl-20" : "lg:pl-64")}>
         {/* Top header */}
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-4 lg:px-6">

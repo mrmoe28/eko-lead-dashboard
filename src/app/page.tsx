@@ -5,6 +5,8 @@ import Link from "next/link";
 import type { Lead } from "@/lib/db/schema";
 import { LeadCard } from "@/components/lead-card";
 import { LeadDetailModal } from "@/components/lead-detail-modal";
+import { LeadsTableView } from "@/components/leads-table-view";
+import { LeadsGridView } from "@/components/leads-grid-view";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,14 +15,21 @@ import {
   DollarSign,
   Activity,
   ArrowRight,
-  Radio
+  Radio,
+  LayoutGrid,
+  Table,
+  Grid2X2
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type ViewMode = "card" | "grid" | "table";
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>("card");
 
   useEffect(() => {
     async function fetchLeads() {
@@ -198,14 +207,60 @@ export default function DashboardPage() {
 
       {/* Recent Hot Leads */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
           <h2 className="text-xl font-semibold">Recent Hot Leads</h2>
-          <Link href="/leads">
-            <Button variant="outline" className="gap-2">
-              View All
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+
+          <div className="flex items-center gap-3">
+            {/* View Mode Toolbar */}
+            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => setViewMode("card")}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors",
+                  viewMode === "card"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+                title="Card View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">Card</span>
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors",
+                  viewMode === "grid"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+                title="Grid View"
+              >
+                <Grid2X2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors",
+                  viewMode === "table"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+                title="Table View"
+              >
+                <Table className="w-4 h-4" />
+                <span className="hidden sm:inline">Table</span>
+              </button>
+            </div>
+
+            <Link href="/leads">
+              <Button variant="outline" className="gap-2">
+                View All
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {recentLeads.length === 0 ? (
@@ -219,16 +274,36 @@ export default function DashboardPage() {
             </Link>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {recentLeads.map((lead) => (
-              <LeadCard
-                key={lead.id}
-                lead={lead}
+          <>
+            {viewMode === "card" && (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {recentLeads.map((lead) => (
+                  <LeadCard
+                    key={lead.id}
+                    lead={lead}
+                    onViewDetails={handleViewDetails}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            )}
+
+            {viewMode === "grid" && (
+              <LeadsGridView
+                leads={recentLeads}
                 onViewDetails={handleViewDetails}
                 onDelete={handleDelete}
               />
-            ))}
-          </div>
+            )}
+
+            {viewMode === "table" && (
+              <LeadsTableView
+                leads={recentLeads}
+                onViewDetails={handleViewDetails}
+                onDelete={handleDelete}
+              />
+            )}
+          </>
         )}
       </div>
 
