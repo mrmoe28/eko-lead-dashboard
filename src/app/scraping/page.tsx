@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Play, Square, Terminal, Loader2, FileText, DollarSign, MessageSquare, List, Twitter, Star, HelpCircle, Users, Home, Settings, Link as LinkIcon, Check, X } from "lucide-react";
+import { Play, Square, Terminal, Loader2, FileText, DollarSign, MessageSquare, List, Twitter, Star, HelpCircle, Users, Home, Settings, Link as LinkIcon, Check, X, Activity } from "lucide-react";
 import type { ScrapingSession, ScrapingLog } from "@/lib/db/schema";
 
 // Scraping sources with their display info
