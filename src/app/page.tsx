@@ -91,11 +91,21 @@ export default function DashboardPage() {
 
   return (
     <div className="relative">
-      {/* Animated Background Orbs */}
+      {/* Animated Background Mesh Gradient */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute -bottom-40 right-1/3 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        {/* Large animated orbs with floating movement */}
+        <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute top-[40%] -left-[15%] w-[700px] h-[700px] bg-purple-600/20 rounded-full blur-3xl animate-float-slow" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-[20%] right-[20%] w-[650px] h-[650px] bg-pink-600/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '5s' }} />
+        <div className="absolute top-[20%] right-[30%] w-[500px] h-[500px] bg-cyan-600/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s', animationDuration: '6s' }} />
+        <div className="absolute bottom-[30%] left-[40%] w-[550px] h-[550px] bg-indigo-600/15 rounded-full blur-3xl animate-float-slow" style={{ animationDelay: '8s' }} />
+
+        {/* Additional smaller accent orbs */}
+        <div className="absolute top-[10%] left-[20%] w-[300px] h-[300px] bg-emerald-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s', animationDuration: '7s' }} />
+        <div className="absolute bottom-[10%] right-[40%] w-[350px] h-[350px] bg-violet-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '6s', animationDuration: '8s' }} />
+
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-slate-950/50 to-black" />
       </div>
 
       <motion.div
