@@ -13,11 +13,13 @@ import {
   X,
   Youtube,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
+  { name: "Landing Page", href: "/landing", icon: Home },
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Live Scraping", href: "/scraping", icon: Radio },
   { name: "Leads Library", href: "/leads", icon: Database },
@@ -147,25 +149,18 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
       {/* Main content */}
       <div className={cn("transition-all duration-300", isCollapsed ? "lg:pl-20" : "lg:pl-64")}>
-        {/* Top header */}
-        <header className="sticky top-0 z-30 bg-slate-900/70 backdrop-blur-lg border-b border-slate-700/60 shadow-lg shadow-blue-900/10">
-          <div className="flex items-center justify-between h-16 px-4 lg:px-6">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden text-gray-400 hover:text-white transition-colors"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
-            <div className="flex items-center gap-4 ml-auto">
-              <div className="text-sm text-gray-400 font-medium">
-                Welcome back!
-              </div>
-            </div>
-          </div>
-        </header>
+        {/* Mobile menu button - only visible on mobile */}
+        <div className="lg:hidden fixed top-4 left-4 z-30">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 bg-slate-900/70 backdrop-blur-lg border border-slate-700/60 rounded-lg text-gray-400 hover:text-white transition-colors shadow-lg"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6 relative">
+        <main className="p-4 lg:p-6 relative min-h-screen">
           {children}
         </main>
       </div>
