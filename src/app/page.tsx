@@ -90,19 +90,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      variants={stagger}
-      className="max-w-7xl mx-auto space-y-6"
-    >
+    <div className="relative">
+      {/* Animated Background Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -bottom-40 right-1/3 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <motion.div
+        initial="initial"
+        animate="animate"
+        variants={stagger}
+        className="max-w-7xl mx-auto space-y-6 relative z-10"
+      >
       {/* Header */}
       <motion.div variants={fadeIn} className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">Welcome back! Here's your lead overview.</p>
+          <p className="text-gray-400 mt-1">Welcome back! Here's your lead overview.</p>
         </div>
         <Link href="/scraping">
           <Button className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all">
@@ -114,59 +122,59 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <motion.div variants={fadeIn} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-blue-500/20 hover:border-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Leads</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{leads.length}</p>
+              <p className="text-sm font-medium text-gray-400">Total Leads</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mt-2">{leads.length}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Users className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/50">
+              <Users className="w-6 h-6 text-white" />
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-4">
-            <span className="text-green-600 font-medium">+{hotLeads.length}</span> hot leads
+            <span className="text-green-400 font-medium">+{hotLeads.length}</span> hot leads
           </p>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-red-500/20 hover:border-red-500/40 hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Hot Leads</p>
-              <p className="text-3xl font-bold text-red-600 mt-2">{hotLeads.length}</p>
+              <p className="text-sm font-medium text-gray-400">Hot Leads</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent mt-2">{hotLeads.length}</p>
             </div>
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-red-600" />
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50">
+              <TrendingUp className="w-6 h-6 text-white" />
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-4">Score 80+ ready to convert</p>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-green-500/20 hover:border-green-500/40 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Est. Revenue</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">
+              <p className="text-sm font-medium text-gray-400">Est. Revenue</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mt-2">
                 ${(estimatedRevenue / 1000).toFixed(0)}k
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50">
+              <DollarSign className="w-6 h-6 text-white" />
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-4">15% close rate estimate</p>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-purple-500/20 hover:border-purple-500/40 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
-              <p className="text-3xl font-bold text-purple-600 mt-2">
+              <p className="text-sm font-medium text-gray-400">Conversion Rate</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mt-2">
                 {leads.length > 0 ? Math.round((hotLeads.length / leads.length) * 100) : 0}%
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <Activity className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/50">
+              <Activity className="w-6 h-6 text-white" />
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-4">Hot leads vs total</p>
@@ -175,8 +183,8 @@ export default function DashboardPage() {
 
       {/* Lead Distribution */}
       <motion.div variants={fadeIn}>
-        <Card className="p-6 hover:shadow-lg transition-shadow">
-          <h2 className="text-xl font-semibold mb-4">Lead Distribution</h2>
+        <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300">
+          <h2 className="text-xl font-semibold mb-4 text-white">Lead Distribution</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center justify-between mb-2">
@@ -232,18 +240,18 @@ export default function DashboardPage() {
       {/* Recent Hot Leads */}
       <motion.div variants={fadeIn}>
         <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
-          <h2 className="text-xl font-semibold">Recent Hot Leads</h2>
+          <h2 className="text-xl font-semibold text-white">Recent Hot Leads</h2>
 
           <div className="flex items-center gap-3">
             {/* View Mode Toolbar */}
-            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-1 rounded-lg">
               <button
                 onClick={() => setViewMode("card")}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors",
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200",
                   viewMode === "card"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-slate-700"
                 )}
                 title="Card View"
               >
@@ -253,10 +261,10 @@ export default function DashboardPage() {
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors",
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200",
                   viewMode === "grid"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-slate-700"
                 )}
                 title="Grid View"
               >
@@ -266,10 +274,10 @@ export default function DashboardPage() {
               <button
                 onClick={() => setViewMode("table")}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors",
+                  "flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200",
                   viewMode === "table"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-slate-700"
                 )}
                 title="Table View"
               >
@@ -288,8 +296,8 @@ export default function DashboardPage() {
         </div>
 
         {recentLeads.length === 0 ? (
-          <Card className="p-12 text-center">
-            <p className="text-gray-500">No leads yet. Start scraping to find leads!</p>
+          <Card className="p-12 text-center bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
+            <p className="text-gray-400">No leads yet. Start scraping to find leads!</p>
             <Link href="/scraping">
               <Button className="mt-4 gap-2">
                 <Radio className="w-4 h-4" />
@@ -338,6 +346,7 @@ export default function DashboardPage() {
         onClose={() => setIsModalOpen(false)}
         onDelete={handleDelete}
       />
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }

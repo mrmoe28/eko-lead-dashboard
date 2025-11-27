@@ -63,7 +63,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full bg-white/80 backdrop-blur-xl border-r border-border/60 shadow-2xl transition-all duration-300 ease-in-out lg:translate-x-0",
+          "fixed top-0 left-0 z-50 h-full bg-slate-900/80 backdrop-blur-xl border-r border-slate-700/60 shadow-2xl shadow-blue-900/20 transition-all duration-300 ease-in-out lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "lg:w-20" : "lg:w-64",
           "w-64" // Always full width on mobile
@@ -71,18 +71,18 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-6 border-b border-slate-700/60">
             <div className={cn("flex items-center gap-2 transition-all", isCollapsed && "lg:justify-center lg:w-full")}>
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/50">
                 <span className="text-white font-bold text-sm">EL</span>
               </div>
-              <span className={cn("font-semibold text-gray-900 whitespace-nowrap transition-opacity", isCollapsed && "lg:hidden")}>
+              <span className={cn("font-semibold text-white whitespace-nowrap transition-opacity", isCollapsed && "lg:hidden")}>
                 Eko Leads
               </span>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-gray-400 hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -98,10 +98,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                   href={item.href}
                   onClick={() => setIsSidebarOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-400 hover:bg-slate-800 hover:text-white",
                     isCollapsed && "lg:justify-center"
                   )}
                   title={isCollapsed ? item.name : undefined}
@@ -116,10 +116,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
           </nav>
 
           {/* Collapse Toggle (Desktop only) */}
-          <div className="hidden lg:block border-t border-gray-200 p-2">
+          <div className="hidden lg:block border-t border-slate-700/60 p-2">
             <button
               onClick={toggleCollapse}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 hover:text-white rounded-lg transition-colors"
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {isCollapsed ? (
@@ -134,7 +134,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
           </div>
 
           {/* Footer */}
-          <div className={cn("p-4 border-t border-gray-200 transition-all", isCollapsed && "lg:px-2")}>
+          <div className={cn("p-4 border-t border-slate-700/60 transition-all", isCollapsed && "lg:px-2")}>
             <div className={cn("text-xs text-gray-500 text-center", isCollapsed && "lg:hidden")}>
               Eko Lead Generator v1.0
             </div>
@@ -148,16 +148,16 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Main content */}
       <div className={cn("transition-all duration-300", isCollapsed ? "lg:pl-20" : "lg:pl-64")}>
         {/* Top header */}
-        <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-lg border-b border-border/60 shadow-sm">
+        <header className="sticky top-0 z-30 bg-slate-900/70 backdrop-blur-lg border-b border-slate-700/60 shadow-lg shadow-blue-900/10">
           <div className="flex items-center justify-between h-16 px-4 lg:px-6">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-900 transition-colors"
+              className="lg:hidden text-gray-400 hover:text-white transition-colors"
             >
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4 ml-auto">
-              <div className="text-sm text-muted-foreground font-medium">
+              <div className="text-sm text-gray-400 font-medium">
                 Welcome back!
               </div>
             </div>
@@ -166,11 +166,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
         {/* Page content */}
         <main className="p-4 lg:p-6 relative">
-          {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
-          <div className="relative z-10">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
     </div>
