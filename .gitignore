@@ -43,3 +43,6 @@ next-env.d.ts
 # youtube oauth credentials (sensitive)
 youtube-oauth.json
 youtube-token.json
+
+.vercel
+.env*.local
