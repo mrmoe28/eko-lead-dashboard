@@ -231,6 +231,28 @@ export default function LiveScrapingPage() {
     }
   }
 
+  async function stopScraping() {
+    if (!currentSession) return;
+
+    try {
+      const response = await fetch(`/api/scraping/sessions/cancel?id=${currentSession.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Refresh sessions and clear current session
+        fetchSessions();
+        setCurrentSession(null);
+        setLogs([]);
+      } else {
+        alert('Failed to stop scraper');
+      }
+    } catch (error) {
+      console.error('Error stopping scraper:', error);
+      alert('Failed to stop scraper');
+    }
+  }
+
   function formatTimestamp(timestamp: Date | string) {
     const date = new Date(timestamp);
     return date.toLocaleTimeString();
@@ -400,6 +422,15 @@ export default function LiveScrapingPage() {
                 Start Scraping
               </>
             )}
+          </Button>
+          <Button
+            onClick={stopScraping}
+            disabled={!currentSession || currentSession.status !== 'running'}
+            variant="destructive"
+            className="gap-2 min-w-[140px]"
+          >
+            <Square className="w-4 h-4" />
+            Stop Scraping
           </Button>
         </div>
         {currentSession?.status === 'running' && (
