@@ -24,22 +24,33 @@ export default function LeadsLibraryPage() {
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("card");
+  const [availableSources, setAvailableSources] = useState<string[]>([]);
 
-  // Fetch leads on mount
+  // Fetch leads and sources on mount
   useEffect(() => {
-    async function fetchLeads() {
+    async function fetchData() {
       try {
-        const response = await fetch("/api/leads");
-        const data = await response.json();
-        setLeads(data);
-        setFilteredLeads(data);
+        const [leadsResponse, sourcesResponse] = await Promise.all([
+          fetch("/api/leads"),
+          fetch("/api/sources")
+        ]);
+
+        const leadsData = await leadsResponse.json();
+        const sourcesData = await sourcesResponse.json();
+
+        setLeads(leadsData);
+        setFilteredLeads(leadsData);
+
+        // Get all unique source names from lead sources
+        const sourceNames = sourcesData.sources?.map((s: any) => s.name) || [];
+        setAvailableSources(sourceNames.sort());
       } catch (error) {
-        console.error("Failed to fetch leads:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     }
-    fetchLeads();
+    fetchData();
   }, []);
 
   // Filter leads when filters change
@@ -80,7 +91,6 @@ export default function LeadsLibraryPage() {
     setLeads(prev => prev.filter(lead => lead.id !== id));
   };
 
-  const sources = Array.from(new Set(leads.map(l => l.source))).sort();
   const hasActiveFilters = searchQuery || priorityFilter !== "all" || sourceFilter !== "all";
 
   if (loading) {
@@ -208,7 +218,7 @@ export default function LeadsLibraryPage() {
                 className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Sources</option>
-                {sources.map((source) => (
+                {availableSources.map((source) => (
                   <option key={source} value={source}>
                     {source}
                   </option>
