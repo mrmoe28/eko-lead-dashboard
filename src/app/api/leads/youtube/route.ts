@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFileSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { db } from "@/lib/db";
+import { leads } from "@/lib/db/schema";
+import { desc, eq, and, or, inArray } from "drizzle-orm";
 
 export const dynamic = 'force-dynamic';
 
@@ -22,61 +23,42 @@ interface YouTubeLead {
 
 export async function GET(request: NextRequest) {
   try {
-    const outputPath = process.env.SCRAPER_OUTPUT_PATH || '/Users/ekodevapps/Desktop/ekoleadgenerator/solar-data-extractor/output';
+    // Query database for YouTube leads that are Hot or Warm
+    const youtubeLeads = await db
+      .select()
+      .from(leads)
+      .where(
+        and(
+          eq(leads.source, 'YouTube'),
+          or(
+            eq(leads.priority, 'Hot'),
+            eq(leads.priority, 'Warm')
+          )
+        )
+      )
+      .orderBy(desc(leads.score));
 
-    // Find the latest CSV file
-    const files = readdirSync(outputPath)
-      .filter(f => f.startsWith('georgia-solar-leads-') && f.endsWith('.csv'))
-      .sort()
-      .reverse();
+    // Transform database leads to match frontend interface
+    const transformedLeads: YouTubeLead[] = youtubeLeads.map(lead => ({
+      id: `youtube-${lead.id}`,
+      priority: lead.priority,
+      score: lead.score,
+      source: lead.source,
+      name: lead.name,
+      location: lead.location,
+      message: lead.message || lead.request || '',
+      profileUrl: lead.profileUrl || '',
+      postUrl: lead.originalPostUrl || '',
+      timestamp: lead.postedTime || '',
+      intent: lead.intent || '',
+      phone: lead.phone || '',
+      email: lead.email || '',
+    }));
 
-    if (files.length === 0) {
-      return NextResponse.json({ error: 'No CSV files found' }, { status: 404 });
-    }
-
-    const latestFile = join(outputPath, files[0]);
-    const csvContent = readFileSync(latestFile, 'utf-8');
-    const lines = csvContent.split('\n').filter(line => line.trim());
-
-    if (lines.length < 2) {
-      return NextResponse.json({ leads: [] });
-    }
-
-    const headers = lines[0].split(',');
-    const leads: YouTubeLead[] = [];
-
-    // Parse CSV and filter for YouTube leads with Hot/Warm priority
-    for (let i = 1; i < lines.length; i++) {
-      const values = parseCSVLine(lines[i]);
-
-      if (values.length !== headers.length) continue;
-
-      const lead: Record<string, string> = {};
-      headers.forEach((header, index) => {
-        lead[header] = values[index];
-      });
-
-      // Only include YouTube leads that are Hot or Warm
-      if (lead.Source === 'YouTube' && (lead.Priority === 'Hot' || lead.Priority === 'Warm')) {
-        leads.push({
-          id: `youtube-${i}-${Date.now()}`,
-          priority: lead.Priority,
-          score: parseInt(lead.Score) || 0,
-          source: lead.Source,
-          name: lead.Name,
-          location: lead.Location,
-          message: lead.Message || '',
-          profileUrl: lead['Profile URL'] || '',
-          postUrl: lead['Post URL'] || '',
-          timestamp: lead.Timestamp || '',
-          intent: lead.Intent || '',
-          phone: lead.Phone || '',
-          email: lead.Email || '',
-        });
-      }
-    }
-
-    return NextResponse.json({ leads, totalCount: leads.length });
+    return NextResponse.json({
+      leads: transformedLeads,
+      totalCount: transformedLeads.length
+    });
 
   } catch (error) {
     console.error('Error fetching YouTube leads:', error);
@@ -85,27 +67,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// Helper function to parse CSV line properly (handles quoted commas)
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-
-  result.push(current.trim());
-  return result;
 }
