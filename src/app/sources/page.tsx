@@ -13,6 +13,15 @@ import {
   Play,
   Pause,
   Archive,
+  FileText,
+  DollarSign,
+  MessageSquare,
+  List,
+  Twitter,
+  Star,
+  HelpCircle,
+  Users,
+  Home,
 } from "lucide-react";
 
 interface LeadSource {
@@ -29,6 +38,19 @@ interface LeadSource {
   lastTestedAt?: string;
   createdAt: string;
 }
+
+// Built-in scraping sources
+const BUILT_IN_SOURCES = [
+  { id: 'permits', name: 'Building Permits', icon: FileText, type: 'built-in' as const, description: 'County building permit databases' },
+  { id: 'incentives', name: 'Incentives', icon: DollarSign, type: 'built-in' as const, description: 'Solar incentive programs' },
+  { id: 'reddit', name: 'Reddit', icon: MessageSquare, type: 'built-in' as const, description: 'Solar subreddits' },
+  { id: 'craigslist', name: 'Craigslist', icon: List, type: 'built-in' as const, description: 'Craigslist posts' },
+  { id: 'twitter', name: 'Twitter/X', icon: Twitter, type: 'built-in' as const, description: 'Twitter/X posts' },
+  { id: 'yelp', name: 'Yelp', icon: Star, type: 'built-in' as const, description: 'Yelp reviews and Q&A' },
+  { id: 'quora', name: 'Quora', icon: HelpCircle, type: 'built-in' as const, description: 'Quora questions' },
+  { id: 'facebook', name: 'Facebook', icon: Users, type: 'built-in' as const, description: 'Facebook groups' },
+  { id: 'nextdoor', name: 'Nextdoor', icon: Home, type: 'built-in' as const, description: 'Nextdoor posts' },
+];
 
 export default function LeadSourcesPage() {
   const [sources, setSources] = useState<LeadSource[]>([]);
@@ -249,14 +271,45 @@ export default function LeadSourcesPage() {
         </Card>
       </div>
 
-      {/* Sources List */}
+      {/* Built-in Sources */}
+      <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 shadow-xl shadow-blue-500/20">
+        <h2 className="text-xl font-bold mb-4 text-white">Built-in Scraper Sources</h2>
+        <p className="text-sm text-gray-400 mb-4">These sources are automatically used during scraping sessions</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {BUILT_IN_SOURCES.map((source) => {
+            const Icon = source.icon;
+            return (
+              <div
+                key={source.id}
+                className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/50 hover:border-blue-500/50 transition-all"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">{source.name}</h3>
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-blue-500/20 text-blue-400">
+                      {source.type}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400">{source.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Custom Sources List */}
       <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 shadow-xl shadow-cyan-500/20">
-        <h2 className="text-xl font-bold mb-4 text-white">Your Lead Sources</h2>
+        <h2 className="text-xl font-bold mb-4 text-white">Custom Lead Sources</h2>
 
         {sources.length === 0 ? (
           <div className="text-center py-12">
             <LinkIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400">No lead sources yet. Add one to get started!</p>
+            <p className="text-gray-400">No custom lead sources yet. Add one to get started!</p>
           </div>
         ) : (
           <div className="space-y-4">

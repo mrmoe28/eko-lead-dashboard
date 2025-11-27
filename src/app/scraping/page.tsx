@@ -447,7 +447,7 @@ export default function LiveScrapingPage() {
             placeholder="Enter location (e.g., Georgia, Florida)"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="flex-1"
+            className="flex-1 text-black bg-gradient-to-r from-gray-100 to-gray-200"
             disabled={isStarting || currentSession?.status === 'running'}
           />
           <Button
