@@ -171,7 +171,7 @@ export default function DashboardPage() {
           </div>
           <p className="text-sm text-gray-500 mt-4">Hot leads vs total</p>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Lead Distribution */}
       <motion.div variants={fadeIn}>
