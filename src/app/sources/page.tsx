@@ -301,22 +301,45 @@ export default function LeadSourcesPage() {
                       </p>
                     )}
 
-                    <div className="flex items-center gap-6 mt-3">
-                      <div className="text-sm">
-                        <span className="text-gray-400">Total Leads:</span>
-                        <span className="text-white font-semibold ml-2">{source.totalLeads}</span>
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-400">Total Leads</span>
+                          <span className="text-white font-semibold">{source.totalLeads}</span>
+                        </div>
                       </div>
-                      <div className="text-sm">
-                        <span className="text-gray-400">Quality Score:</span>
-                        <span className="text-white font-semibold ml-2">{source.qualityScore}/100</span>
+
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-400">Avg Lead Score</span>
+                          <span className="text-white font-semibold">{source.avgLeadScore}</span>
+                        </div>
                       </div>
-                      <div className="text-sm">
-                        <span className="text-gray-400">Conversion:</span>
-                        <span className="text-white font-semibold ml-2">{source.conversionRate}%</span>
+
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-400">Quality Score</span>
+                          <span className="text-white font-semibold">{source.qualityScore}/100</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-600/50 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+                            style={{ width: `${source.qualityScore}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="text-sm">
-                        <span className="text-gray-400">Avg Score:</span>
-                        <span className="text-white font-semibold ml-2">{source.avgLeadScore}</span>
+
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-400">Conversion Rate</span>
+                          <span className="text-white font-semibold">{source.conversionRate}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-600/50 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
+                            style={{ width: `${source.conversionRate}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
