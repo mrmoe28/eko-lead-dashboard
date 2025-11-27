@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import type { Lead } from "@/lib/db/schema";
 import { LeadCard } from "@/components/lead-card";
 import { LeadDetailModal } from "@/components/lead-detail-modal";
@@ -23,6 +24,20 @@ import {
 import { cn } from "@/lib/utils";
 
 type ViewMode = "card" | "grid" | "table";
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5, ease: [0.6, -0.05, 0.01, 0.99] },
+};
+
+const stagger = {
+  animate: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -75,23 +90,30 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <motion.div
+      initial="initial"
+      animate="animate"
+      variants={stagger}
+      className="max-w-7xl mx-auto space-y-6"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={fadeIn} className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's your lead overview.</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">Welcome back! Here's your lead overview.</p>
         </div>
         <Link href="/scraping">
-          <Button className="gap-2">
+          <Button className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all">
             <Radio className="w-4 h-4" />
             Start Scraping
           </Button>
         </Link>
-      </div>
+      </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <motion.div variants={fadeIn} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -152,8 +174,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Lead Distribution */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Lead Distribution</h2>
+      <motion.div variants={fadeIn}>
+        <Card className="p-6 hover:shadow-lg transition-shadow">
+          <h2 className="text-xl font-semibold mb-4">Lead Distribution</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center justify-between mb-2">
@@ -203,10 +226,11 @@ export default function DashboardPage() {
             <p className="text-xs text-blue-700 mt-2">Score &lt;60</p>
           </div>
         </div>
-      </Card>
+        </Card>
+      </motion.div>
 
       {/* Recent Hot Leads */}
-      <div>
+      <motion.div variants={fadeIn}>
         <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
           <h2 className="text-xl font-semibold">Recent Hot Leads</h2>
 
@@ -305,7 +329,7 @@ export default function DashboardPage() {
             )}
           </>
         )}
-      </div>
+      </motion.div>
 
       {/* Detail Modal */}
       <LeadDetailModal
@@ -314,6 +338,6 @@ export default function DashboardPage() {
         onClose={() => setIsModalOpen(false)}
         onDelete={handleDelete}
       />
-    </div>
+    </motion.div>
   );
 }

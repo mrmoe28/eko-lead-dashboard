@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { SidebarLayout } from "@/components/sidebar-layout";
+import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,10 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-background via-background to-muted/10`}
       >
         <Providers>
-          <SidebarLayout>{children}</SidebarLayout>
+          <SmoothScrollProvider>
+            <SidebarLayout>{children}</SidebarLayout>
+          </SmoothScrollProvider>
         </Providers>
       </body>
     </html>

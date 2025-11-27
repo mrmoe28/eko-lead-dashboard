@@ -63,7 +63,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full bg-white border-r border-gray-200 transition-all duration-300 ease-in-out lg:translate-x-0",
+          "fixed top-0 left-0 z-50 h-full bg-white/80 backdrop-blur-xl border-r border-border/60 shadow-2xl transition-all duration-300 ease-in-out lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "lg:w-20" : "lg:w-64",
           "w-64" // Always full width on mobile
@@ -148,16 +148,16 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Main content */}
       <div className={cn("transition-all duration-300", isCollapsed ? "lg:pl-20" : "lg:pl-64")}>
         {/* Top header */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
+        <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-lg border-b border-border/60 shadow-sm">
           <div className="flex items-center justify-between h-16 px-4 lg:px-6">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-gray-500 hover:text-gray-900 transition-colors"
             >
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4 ml-auto">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground font-medium">
                 Welcome back!
               </div>
             </div>
@@ -165,8 +165,12 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6">
-          {children}
+        <main className="p-4 lg:p-6 relative">
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+          <div className="relative z-10">
+            {children}
+          </div>
         </main>
       </div>
     </div>
