@@ -23,11 +23,26 @@ export async function GET() {
 // POST - Create new lead source
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const name = formData.get('name') as string;
-    const type = formData.get('type') as 'url' | 'file';
-    const url = formData.get('url') as string | null;
-    const file = formData.get('file') as File | null;
+    const contentType = request.headers.get('content-type') || '';
+    let name: string;
+    let type: 'url' | 'file';
+    let url: string | null = null;
+    let file: File | null = null;
+
+    // Handle both FormData and JSON
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      name = formData.get('name') as string;
+      type = formData.get('type') as 'url' | 'file';
+      url = formData.get('url') as string | null;
+      file = formData.get('file') as File | null;
+    } else {
+      const body = await request.json();
+      name = body.name;
+      type = body.type;
+      url = body.url || null;
+      file = body.file || null;
+    }
 
     if (!name || !type) {
       return NextResponse.json(
@@ -45,7 +60,7 @@ export async function POST(request: NextRequest) {
     if (type === 'url' && url) {
       newSource.url = url;
     } else if (type === 'file' && file) {
-      newSource.fileName = file.name;
+      newSource.fileName = typeof file === 'string' ? file : file.name;
       // TODO: Store file in cloud storage and save the URL
     }
 
