@@ -149,3 +149,16 @@
 .animate-float-slow {
   animation: float-slow 25s ease-in-out infinite;
 }
+
+@keyframes shimmer {
+  0% {
+    left: -33.333%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

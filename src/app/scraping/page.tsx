@@ -21,6 +21,15 @@ const SCRAPING_SOURCES = [
   { id: 'nextdoor', name: 'Nextdoor', icon: Home },
 ];
 
+interface LeadSource {
+  id: number;
+  name: string;
+  type: string;
+  url?: string;
+  fileName?: string;
+  status: string;
+}
+
 export default function LiveScrapingPage() {
   const router = useRouter();
   const [sessions, setSessions] = useState<ScrapingSession[]>([]);
@@ -32,12 +41,28 @@ export default function LiveScrapingPage() {
   const [sourceProgress, setSourceProgress] = useState<Record<string, number>>({});
   const [showSettings, setShowSettings] = useState(false);
   const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(() => {
+    // Load from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('enabledScrapingSources');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    }
+    // Default: all enabled
     const initial: Record<string, boolean> = {};
     SCRAPING_SOURCES.forEach(source => initial[source.id] = true);
     return initial;
   });
+  const [dbSources, setDbSources] = useState<LeadSource[]>([]);
   const consoleRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
+
+  // Save enabled sources to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('enabledScrapingSources', JSON.stringify(enabledSources));
+    }
+  }, [enabledSources]);
 
   // Close settings dropdown when clicking outside
   useEffect(() => {
@@ -56,9 +81,34 @@ export default function LiveScrapingPage() {
   // Fetch sessions on mount
   useEffect(() => {
     fetchSessions();
+    fetchLeadSources();
     const interval = setInterval(fetchSessions, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch lead sources from database
+  async function fetchLeadSources() {
+    try {
+      const response = await fetch('/api/sources');
+      const data = await response.json();
+      if (data.sources) {
+        setDbSources(data.sources);
+        // Add new sources to enabledSources if not already present
+        setEnabledSources(prev => {
+          const updated = { ...prev };
+          data.sources.forEach((source: LeadSource) => {
+            const sourceKey = `db_${source.id}`;
+            if (updated[sourceKey] === undefined) {
+              updated[sourceKey] = true;
+            }
+          });
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch lead sources:', error);
+    }
+  }
 
   // Update source progress from logs
   useEffect(() => {
@@ -322,6 +372,7 @@ export default function LiveScrapingPage() {
               </div>
 
               <div className="max-h-96 overflow-y-auto">
+                {/* Built-in scraping sources */}
                 {SCRAPING_SOURCES.map((source) => {
                   const Icon = source.icon;
                   const isEnabled = enabledSources[source.id];
@@ -329,7 +380,7 @@ export default function LiveScrapingPage() {
                     <button
                       key={source.id}
                       onClick={() => toggleSource(source.id)}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100"
                     >
                       <div className="flex items-center gap-3">
                         <Icon className="w-5 h-5 text-gray-600" />
@@ -341,6 +392,37 @@ export default function LiveScrapingPage() {
                     </button>
                   );
                 })}
+
+                {/* Custom database sources */}
+                {dbSources.length > 0 && (
+                  <>
+                    <div className="px-4 py-2 bg-gray-100 border-y border-gray-200">
+                      <span className="text-xs font-semibold text-gray-600 uppercase">Custom Sources</span>
+                    </div>
+                    {dbSources.map((source) => {
+                      const sourceKey = `db_${source.id}`;
+                      const isEnabled = enabledSources[sourceKey];
+                      return (
+                        <button
+                          key={sourceKey}
+                          onClick={() => toggleSource(sourceKey)}
+                          className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="flex items-center gap-3">
+                            <LinkIcon className="w-5 h-5 text-blue-600" />
+                            <div className="text-left">
+                              <span className="text-sm font-medium text-gray-900 block">{source.name}</span>
+                              <span className="text-xs text-gray-500">{source.type}</span>
+                            </div>
+                          </div>
+                          <div className={`w-10 h-6 rounded-full transition-colors ${isEnabled ? 'bg-green-500' : 'bg-gray-300'} relative`}>
+                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </>
+                )}
               </div>
 
               <div className="p-4 border-t border-gray-200 bg-gray-50">
@@ -450,49 +532,117 @@ export default function LiveScrapingPage() {
         )}
       </Card>
 
-      {/* Progress Bars */}
+      {/* Progress Bars - Modern Redesign */}
       {currentSession?.status === 'running' && (
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Scraping Progress</h2>
-          <div className="space-y-3">
-            {SCRAPING_SOURCES.map((source) => {
-              const progress = sourceProgress[source.id] || 0;
-              const isComplete = progress === 100;
-              const isProcessing = progress > 0 && progress < 100;
-              const Icon = source.icon;
+        <div className="relative">
+          {/* Animated background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl blur-xl animate-pulse" />
 
-              return (
-                <div key={source.id} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <Icon className="w-4 h-4 text-gray-600" />
-                      <span className="font-medium">{source.name}</span>
+          <Card className="relative p-8 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <Activity className="w-7 h-7 text-blue-400 animate-pulse" />
+                  Scraping Progress
+                </h2>
+                <p className="text-slate-400 text-sm mt-1">Real-time source monitoring</p>
+              </div>
+              <div className="px-4 py-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                <span className="text-blue-300 text-sm font-medium">
+                  {Object.values(sourceProgress).filter(p => p === 100).length} / {SCRAPING_SOURCES.filter(s => enabledSources[s.id]).length} Complete
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SCRAPING_SOURCES.filter(source => enabledSources[source.id]).map((source) => {
+                const progress = sourceProgress[source.id] || 0;
+                const isComplete = progress === 100;
+                const isProcessing = progress > 0 && progress < 100;
+                const Icon = source.icon;
+
+                return (
+                  <div
+                    key={source.id}
+                    className={`relative p-4 rounded-xl border transition-all duration-500 ${
+                      isComplete
+                        ? 'bg-green-500/10 border-green-500/30 shadow-lg shadow-green-500/20'
+                        : isProcessing
+                        ? 'bg-blue-500/10 border-blue-500/30 shadow-lg shadow-blue-500/20'
+                        : 'bg-slate-800/50 border-slate-700/50'
+                    }`}
+                  >
+                    {/* Animated corner gradient */}
+                    {isProcessing && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl animate-pulse" />
+                    )}
+
+                    <div className="relative">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            isComplete ? 'bg-green-500/20' :
+                            isProcessing ? 'bg-blue-500/20' :
+                            'bg-slate-700/50'
+                          }`}>
+                            <Icon className={`w-5 h-5 ${
+                              isComplete ? 'text-green-400' :
+                              isProcessing ? 'text-blue-400' :
+                              'text-slate-500'
+                            }`} />
+                          </div>
+                          <span className="font-semibold text-white text-sm">{source.name}</span>
+                        </div>
+                        {isComplete && (
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Progress bar with gradient */}
+                      <div className="relative h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                        <div
+                          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out ${
+                            isComplete
+                              ? 'bg-gradient-to-r from-green-400 to-emerald-500'
+                              : isProcessing
+                              ? 'bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse'
+                              : 'bg-slate-600'
+                          }`}
+                          style={{ width: `${progress}%` }}
+                        />
+                        {isProcessing && (
+                          <div
+                            className="absolute inset-y-0 bg-white/30 w-1/3 animate-shimmer"
+                            style={{
+                              animation: 'shimmer 2s infinite',
+                              left: '-33.333%',
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      {/* Status text */}
+                      <div className="flex items-center justify-between mt-2">
+                        <span className={`text-xs font-medium ${
+                          isComplete ? 'text-green-400' :
+                          isProcessing ? 'text-blue-400' :
+                          'text-slate-500'
+                        }`}>
+                          {isComplete ? '✓ Complete' :
+                           isProcessing ? '⟳ Processing...' :
+                           '◦ Waiting...'}
+                        </span>
+                        <span className="text-xs font-bold text-white">{progress}%</span>
+                      </div>
                     </div>
-                    <span className={`text-xs font-medium ${
-                      isComplete ? 'text-green-600' :
-                      isProcessing ? 'text-blue-600' :
-                      'text-gray-400'
-                    }`}>
-                      {isComplete ? 'Complete' :
-                       isProcessing ? 'Processing...' :
-                       'Waiting...'}
-                    </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all duration-500 ${
-                        isComplete ? 'bg-green-500' :
-                        isProcessing ? 'bg-blue-500' :
-                        'bg-gray-300'
-                      }`}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* Current Session Status */}
