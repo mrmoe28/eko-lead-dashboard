@@ -508,10 +508,10 @@ export default function LiveScrapingPage() {
           {sessions.slice(0, 6).map((session) => (
             <Card
               key={session.id}
-              className={`p-4 transition-all ${
+              className={`p-4 transition-all bg-slate-800/50 backdrop-blur-xl border-slate-700/50 ${
                 currentSession?.id === session.id
-                  ? 'ring-2 ring-blue-500'
-                  : 'hover:shadow-md'
+                  ? 'shadow-xl shadow-blue-500/50 border-blue-500/50'
+                  : 'shadow-lg shadow-black/50 hover:shadow-xl hover:shadow-purple-500/30 hover:border-slate-600/50'
               }`}
             >
               <div
@@ -529,8 +529,8 @@ export default function LiveScrapingPage() {
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="font-semibold">Session #{session.id}</div>
-                    <div className="text-sm text-gray-600 mt-1">{session.location}</div>
+                    <div className="font-semibold text-white">Session #{session.id}</div>
+                    <div className="text-sm text-gray-400 mt-1">{session.location}</div>
                   </div>
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(
@@ -540,11 +540,11 @@ export default function LiveScrapingPage() {
                     {session.status}
                   </span>
                 </div>
-                <div className="mt-3 space-y-1 text-sm text-gray-600">
+                <div className="mt-3 space-y-1 text-sm text-white">
                   <div>Leads: {session.totalLeadsFound}</div>
                   <div>{new Date(session.startedAt).toLocaleDateString()}</div>
                   {session.status === 'completed' && (
-                    <div className="text-xs text-blue-600 mt-2">
+                    <div className="text-xs text-blue-400 mt-2">
                       Double-click to view details
                     </div>
                   )}
@@ -552,7 +552,7 @@ export default function LiveScrapingPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-3 pt-3 border-t border-gray-200 flex gap-2">
+              <div className="mt-3 pt-3 border-t border-slate-700/50 flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -560,7 +560,7 @@ export default function LiveScrapingPage() {
                     e.stopPropagation();
                     deleteSession(session.id);
                   }}
-                  className="flex-1 text-red-600 hover:text-red-700"
+                  className="flex-1 bg-slate-700 border-slate-600 text-red-400 hover:bg-red-900/30 hover:text-red-300"
                 >
                   Delete
                 </Button>

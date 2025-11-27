@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Youtube, RefreshCw, Send, SkipForward, Loader2, CheckCircle2, XCircle, LayoutGrid, Table, List } from "lucide-react";
+import { Youtube, RefreshCw, Send, SkipForward, Loader2, CheckCircle2, XCircle, LayoutGrid, Table, List, MessageSquare } from "lucide-react";
 import { YouTubeLeadsTable } from "@/components/youtube-leads-table";
 import { YouTubeLeadsList } from "@/components/youtube-leads-list";
+import { YouTubeReplyModal } from "@/components/youtube-reply-modal";
 import { cn } from "@/lib/utils";
 
 type ViewMode = "card" | "list" | "table";
@@ -35,6 +36,8 @@ export default function YouTubeLeadsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("card");
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [selectedLeadForModal, setSelectedLeadForModal] = useState<YouTubeLead | null>(null);
 
   useEffect(() => {
     fetchLeads();
@@ -167,6 +170,18 @@ export default function YouTubeLeadsPage() {
     setLeads(leads.map(l =>
       l.id === leadId ? { ...l, generatedReply: newReply } : l
     ));
+  }
+
+  function openReplyModal(lead: YouTubeLead) {
+    setSelectedLeadForModal(lead);
+    setReplyModalOpen(true);
+  }
+
+  function updateModalReply(newReply: string) {
+    if (selectedLeadForModal) {
+      updateReply(selectedLeadForModal.id, newReply);
+      setSelectedLeadForModal({ ...selectedLeadForModal, generatedReply: newReply });
+    }
   }
 
   function extractVideoId(url: string): string | null {
