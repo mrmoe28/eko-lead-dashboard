@@ -53,7 +53,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
       {/* Mobile sidebar backdrop */}
       {isSidebarOpen && (
         <div
