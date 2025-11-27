@@ -511,7 +511,7 @@ export default function LiveScrapingPage() {
               <p className="text-slate-400 text-sm mt-1">
                 {currentSession?.status === 'running'
                   ? 'Real-time source monitoring'
-                  : 'Start a scraping session to see progress'}
+                  : 'Start a scraping session to track progress'}
               </p>
             </div>
             {currentSession?.status === 'running' ? (
