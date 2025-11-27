@@ -439,44 +439,6 @@ export default function LiveScrapingPage() {
         </div>
       </div>
 
-      {/* Quick Start Guide */}
-      <Card className="p-6 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-            <Play className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-semibold mb-3">Automated Scraping Setup</h2>
-            <div className="space-y-4 text-sm">
-              <div className="p-4 bg-white rounded-lg border border-green-300">
-                <p className="font-semibold text-green-900 mb-2">One-Time Setup (5 seconds)</p>
-                <p className="text-gray-700 mb-2">Install the background watcher service - runs automatically on login:</p>
-                <ol className="list-decimal list-inside space-y-1 text-gray-700 ml-2">
-                  <li><strong>Mac:</strong> Double-click <code className="bg-green-100 px-1 rounded text-xs">Install-Auto-Watcher.command</code></li>
-                  <li><strong>Terminal:</strong> Run <code className="bg-green-100 px-2 py-1 rounded">./install-auto-watcher.sh</code></li>
-                </ol>
-                <p className="text-xs text-green-700 mt-2">Auto-starts on login • Runs in background • No terminal needed</p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="font-semibold text-green-900">After Setup: Just Click Below</p>
-                  <p className="text-gray-700 text-xs">
-                    The watcher runs 24/7 in the background. Just click "Start Scraping" and it works!
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p className="font-semibold text-green-900">Alternative: Manual Run</p>
-                  <p className="text-gray-700 text-xs">
-                    Don't want background service? Run manually: <code className="bg-green-100 px-1 rounded">npm run scrape Georgia</code>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
       {/* Start Scraping Card */}
       <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <h2 className="text-xl font-semibold mb-4">Trigger Scraping Job</h2>
