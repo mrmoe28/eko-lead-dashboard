@@ -495,26 +495,39 @@ export default function LiveScrapingPage() {
       </Card>
 
       {/* Progress Bars - Modern Redesign */}
-      {currentSession?.status === 'running' && (
-        <div className="relative">
-          {/* Animated background gradient */}
+      <div className="relative">
+        {/* Animated background gradient */}
+        {currentSession?.status === 'running' && (
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl blur-xl animate-pulse" />
+        )}
 
-          <Card className="relative p-8 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <Activity className="w-7 h-7 text-blue-400 animate-pulse" />
-                  Scraping Progress
-                </h2>
-                <p className="text-slate-400 text-sm mt-1">Real-time source monitoring</p>
-              </div>
+        <Card className="relative p-8 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <Activity className={`w-7 h-7 ${currentSession?.status === 'running' ? 'text-blue-400 animate-pulse' : 'text-slate-500'}`} />
+                Scraping Progress
+              </h2>
+              <p className="text-slate-400 text-sm mt-1">
+                {currentSession?.status === 'running'
+                  ? 'Real-time source monitoring'
+                  : 'Start a scraping session to see progress'}
+              </p>
+            </div>
+            {currentSession?.status === 'running' ? (
               <div className="px-4 py-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
                 <span className="text-blue-300 text-sm font-medium">
                   {Object.values(sourceProgress).filter(p => p === 100).length} / {SCRAPING_SOURCES.filter(s => enabledSources[s.id]).length} Complete
                 </span>
               </div>
-            </div>
+            ) : (
+              <div className="px-4 py-2 bg-slate-700/50 rounded-lg border border-slate-600/30">
+                <span className="text-slate-400 text-sm font-medium">
+                  {SCRAPING_SOURCES.filter(s => enabledSources[s.id]).length} Sources Ready
+                </span>
+              </div>
+            )}
+          </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {SCRAPING_SOURCES.filter(source => enabledSources[source.id]).map((source) => {
@@ -602,10 +615,9 @@ export default function LiveScrapingPage() {
                   </div>
                 );
               })}
-            </div>
-          </Card>
-        </div>
-      )}
+          </div>
+        </Card>
+      </div>
 
       {/* Current Session Status */}
       {currentSession && (
