@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Play, Square, Terminal, Loader2, FileText, DollarSign, MessageSquare, List, Twitter, Star, HelpCircle, Users, Home } from "lucide-react";
+import { Play, Square, Terminal, Loader2, FileText, DollarSign, MessageSquare, List, Twitter, Star, HelpCircle, Users, Home, Settings, Link as LinkIcon, Check, X } from "lucide-react";
 import type { ScrapingSession, ScrapingLog } from "@/lib/db/schema";
 
 // Scraping sources with their display info
@@ -30,7 +30,28 @@ export default function LiveScrapingPage() {
   const [isStarting, setIsStarting] = useState(false);
   const [location, setLocation] = useState("Georgia");
   const [sourceProgress, setSourceProgress] = useState<Record<string, number>>({});
+  const [showSettings, setShowSettings] = useState(false);
+  const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    SCRAPING_SOURCES.forEach(source => initial[source.id] = true);
+    return initial;
+  });
   const consoleRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  // Close settings dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setShowSettings(false);
+      }
+    }
+
+    if (showSettings) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showSettings]);
 
   // Fetch sessions on mount
   useEffect(() => {
@@ -243,14 +264,75 @@ export default function LiveScrapingPage() {
     }
   }
 
+  function toggleSource(sourceId: string) {
+    setEnabledSources(prev => ({
+      ...prev,
+      [sourceId]: !prev[sourceId]
+    }));
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Live Scraping</h1>
-        <p className="text-gray-600 mt-1">
-          Monitor real-time solar lead scraping across multiple sources
-        </p>
+      {/* Header with Settings */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Live Scraping</h1>
+          <p className="text-gray-600 mt-1">
+            Monitor real-time solar lead scraping across multiple sources
+          </p>
+        </div>
+
+        {/* Settings Dropdown */}
+        <div className="relative" ref={settingsRef}>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 bg-white hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors shadow-sm"
+            title="Scraping Settings"
+          >
+            <Settings className="w-6 h-6 text-gray-700" />
+          </button>
+
+          {showSettings && (
+            <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-lg shadow-xl z-50">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="font-semibold text-gray-900">Scraping Sources</h3>
+                <p className="text-xs text-gray-600 mt-1">Enable or disable sources</p>
+              </div>
+
+              <div className="max-h-96 overflow-y-auto">
+                {SCRAPING_SOURCES.map((source) => {
+                  const Icon = source.icon;
+                  const isEnabled = enabledSources[source.id];
+                  return (
+                    <button
+                      key={source.id}
+                      onClick={() => toggleSource(source.id)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-900">{source.name}</span>
+                      </div>
+                      <div className={`w-10 h-6 rounded-full transition-colors ${isEnabled ? 'bg-green-500' : 'bg-gray-300'} relative`}>
+                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <button
+                  onClick={() => router.push('/sources')}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                  Manage Lead Sources
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Quick Start Guide */}
