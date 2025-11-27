@@ -256,8 +256,8 @@ export default function AnalyticsPage() {
               <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569', color: '#fff' }} />
               <Legend wrapperStyle={{ color: '#fff' }} />
               <Bar dataKey="hotLeads" stackId="a" fill="url(#colorHot)" name="Hot" isAnimationActive={true} animationDuration={1500} />
-              <Bar dataKey="warmLeads" stackId="a" fill="url(#colorWarm)" name="Warm" isAnimationActive={true} animationDuration={1500} animationDelay={200} />
-              <Bar dataKey="coldLeads" stackId="a" fill="url(#colorCold)" name="Cold" isAnimationActive={true} animationDuration={1500} animationDelay={400} />
+              <Bar dataKey="warmLeads" stackId="a" fill="url(#colorWarm)" name="Warm" isAnimationActive={true} animationDuration={1500} />
+              <Bar dataKey="coldLeads" stackId="a" fill="url(#colorCold)" name="Cold" isAnimationActive={true} animationDuration={1500} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -283,7 +283,7 @@ export default function AnalyticsPage() {
               <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569', color: '#fff' }} />
               <Legend wrapperStyle={{ color: '#fff' }} />
               <Line type="monotone" dataKey="totalLeads" stroke="url(#colorTotalLine)" name="Total Leads" strokeWidth={3} isAnimationActive={true} animationDuration={2000} />
-              <Line type="monotone" dataKey="hotLeads" stroke="url(#colorHotLine)" name="Hot Leads" strokeWidth={3} isAnimationActive={true} animationDuration={2000} animationDelay={300} />
+              <Line type="monotone" dataKey="hotLeads" stroke="url(#colorHotLine)" name="Hot Leads" strokeWidth={3} isAnimationActive={true} animationDuration={2000} />
             </LineChart>
           </ResponsiveContainer>
         </Card>
