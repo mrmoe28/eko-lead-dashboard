@@ -186,52 +186,52 @@ export default function DashboardPage() {
         <Card className="p-6 bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300">
           <h2 className="text-xl font-semibold mb-4 text-white">Lead Distribution</h2>
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-red-500/30 rounded-lg hover:border-red-500/50 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-red-900">Hot Leads</span>
-              <span className="text-2xl font-bold text-red-700">{hotLeads.length}</span>
+              <span className="text-sm font-medium text-red-300">Hot Leads</span>
+              <span className="text-2xl font-bold text-red-400">{hotLeads.length}</span>
             </div>
-            <div className="w-full bg-red-200 rounded-full h-2">
+            <div className="w-full bg-red-900/30 rounded-full h-2">
               <div
-                className="bg-red-600 h-2 rounded-full"
+                className="bg-gradient-to-r from-red-500 to-orange-500 h-2 rounded-full shadow-lg shadow-red-500/50"
                 style={{
                   width: `${leads.length > 0 ? (hotLeads.length / leads.length) * 100 : 0}%`,
                 }}
               />
             </div>
-            <p className="text-xs text-red-700 mt-2">Score 80+</p>
+            <p className="text-xs text-red-300 mt-2">Score 80+</p>
           </div>
 
-          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-orange-500/30 rounded-lg hover:border-orange-500/50 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-orange-900">Warm Leads</span>
-              <span className="text-2xl font-bold text-orange-700">{warmLeads.length}</span>
+              <span className="text-sm font-medium text-orange-300">Warm Leads</span>
+              <span className="text-2xl font-bold text-orange-400">{warmLeads.length}</span>
             </div>
-            <div className="w-full bg-orange-200 rounded-full h-2">
+            <div className="w-full bg-orange-900/30 rounded-full h-2">
               <div
-                className="bg-orange-600 h-2 rounded-full"
+                className="bg-gradient-to-r from-orange-500 to-yellow-500 h-2 rounded-full shadow-lg shadow-orange-500/50"
                 style={{
                   width: `${leads.length > 0 ? (warmLeads.length / leads.length) * 100 : 0}%`,
                 }}
               />
             </div>
-            <p className="text-xs text-orange-700 mt-2">Score 60-79</p>
+            <p className="text-xs text-orange-300 mt-2">Score 60-79</p>
           </div>
 
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-blue-500/30 rounded-lg hover:border-blue-500/50 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-blue-900">Cold Leads</span>
-              <span className="text-2xl font-bold text-blue-700">{coldLeads.length}</span>
+              <span className="text-sm font-medium text-blue-300">Cold Leads</span>
+              <span className="text-2xl font-bold text-blue-400">{coldLeads.length}</span>
             </div>
-            <div className="w-full bg-blue-200 rounded-full h-2">
+            <div className="w-full bg-blue-900/30 rounded-full h-2">
               <div
-                className="bg-blue-600 h-2 rounded-full"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full shadow-lg shadow-blue-500/50"
                 style={{
                   width: `${leads.length > 0 ? (coldLeads.length / leads.length) * 100 : 0}%`,
                 }}
               />
             </div>
-            <p className="text-xs text-blue-700 mt-2">Score &lt;60</p>
+            <p className="text-xs text-blue-300 mt-2">Score &lt;60</p>
           </div>
         </div>
         </Card>
