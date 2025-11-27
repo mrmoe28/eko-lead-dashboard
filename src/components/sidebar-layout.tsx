@@ -14,7 +14,8 @@ import {
   Youtube,
   ChevronLeft,
   ChevronRight,
-  Home
+  Home,
+  Link as LinkIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ const navigation = [
   { name: "Live Scraping", href: "/scraping", icon: Radio },
   { name: "Leads Library", href: "/leads", icon: Database },
   { name: "YouTube Replies", href: "/leads/youtube", icon: Youtube },
+  { name: "Lead Sources", href: "/sources", icon: LinkIcon },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
 ];

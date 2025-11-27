@@ -80,6 +80,38 @@ export const contactedLeads = pgTable('contacted_leads', {
   contactedAt: timestamp('contacted_at').defaultNow().notNull(),
 });
 
+// Lead Sources - Track and test different lead sources
+export const leadSources = pgTable('lead_sources', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // 'url', 'file', 'manual'
+  url: text('url'),
+  fileName: text('file_name'),
+  status: text('status').notNull().default('active'), // 'active', 'testing', 'paused', 'archived'
+  totalLeads: integer('total_leads').default(0).notNull(),
+  qualityScore: integer('quality_score').default(0), // 0-100
+  conversionRate: integer('conversion_rate').default(0), // percentage
+  avgLeadScore: integer('avg_lead_score').default(0),
+  lastTestedAt: timestamp('last_tested_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Lead Source Analytics - Detailed analytics per source
+export const leadSourceAnalytics = pgTable('lead_source_analytics', {
+  id: serial('id').primaryKey(),
+  sourceId: integer('source_id').notNull(),
+  date: timestamp('date').notNull(),
+  leadsGenerated: integer('leads_generated').default(0).notNull(),
+  hotLeads: integer('hot_leads').default(0).notNull(),
+  warmLeads: integer('warm_leads').default(0).notNull(),
+  coldLeads: integer('cold_leads').default(0).notNull(),
+  avgResponseTime: integer('avg_response_time'), // in minutes
+  conversionCount: integer('conversion_count').default(0).notNull(),
+  revenue: integer('revenue').default(0), // in cents
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Type exports
 export type ScrapingSession = typeof scrapingSessions.$inferSelect;
 export type NewScrapingSession = typeof scrapingSessions.$inferInsert;
@@ -92,3 +124,9 @@ export type NewLead = typeof leads.$inferInsert;
 
 export type ContactedLead = typeof contactedLeads.$inferSelect;
 export type NewContactedLead = typeof contactedLeads.$inferInsert;
+
+export type LeadSource = typeof leadSources.$inferSelect;
+export type NewLeadSource = typeof leadSources.$inferInsert;
+
+export type LeadSourceAnalytic = typeof leadSourceAnalytics.$inferSelect;
+export type NewLeadSourceAnalytic = typeof leadSourceAnalytics.$inferInsert;
