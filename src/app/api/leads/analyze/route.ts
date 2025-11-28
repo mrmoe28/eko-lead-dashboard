@@ -3,8 +3,39 @@ import { analyzeLead, enrichLead, generateResponse } from '@/lib/llm/lead-intell
 import { db } from '@/lib/db';
 import { leads } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import type { Lead } from '@/lib/db/schema';
+import type { ScrapedLead } from '@/lib/scraper-config';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * Convert database Lead to ScrapedLead format
+ * Converts null to undefined for optional fields
+ */
+function convertLeadToScrapedLead(lead: Lead): Partial<ScrapedLead> {
+  return {
+    name: lead.name,
+    location: lead.location,
+    score: lead.score,
+    priority: lead.priority as 'urgent' | 'high' | 'medium' | 'low' | undefined,
+    source: lead.source,
+    phone: lead.phone ?? undefined,
+    email: lead.email ?? undefined,
+    request: lead.request,
+    whyHot: lead.whyHot ?? undefined,
+    actionRequired: lead.actionRequired ?? undefined,
+    postedTime: lead.postedTime ?? undefined,
+    profileUrl: lead.profileUrl ?? undefined,
+    originalPostUrl: lead.originalPostUrl ?? undefined,
+    revenueMin: lead.revenueMin ?? undefined,
+    revenueMax: lead.revenueMax ?? undefined,
+    address: lead.address ?? undefined,
+    systemSize: lead.systemSize ?? undefined,
+    permitNumber: lead.permitNumber ?? undefined,
+    message: lead.message ?? undefined,
+    intent: lead.intent ?? undefined,
+  };
+}
 
 /**
  * POST /api/leads/analyze
@@ -36,14 +67,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Convert database Lead to ScrapedLead format
+    const leadForAnalysis = convertLeadToScrapedLead(lead);
+
     // Perform requested action
     switch (action) {
       case 'analyze': {
-        // Convert database Lead to ScrapedLead format for analysis
-        const leadForAnalysis = {
-          ...lead,
-          priority: lead.priority as 'urgent' | 'high' | 'medium' | 'low' | undefined,
-        };
         const analysis = await analyzeLead(leadForAnalysis);
 
         // Update lead with analysis results
@@ -68,12 +97,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'enrich': {
-        // Convert database Lead to ScrapedLead format for enrichment
-        const leadForEnrichment = {
-          ...lead,
-          priority: lead.priority as 'urgent' | 'high' | 'medium' | 'low' | undefined,
-        };
-        const enriched = await enrichLead(leadForEnrichment);
+        const enriched = await enrichLead(leadForAnalysis);
 
         // Update lead with enriched data
         const updates: any = {
@@ -97,12 +121,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'generate_response': {
-        // Convert database Lead to ScrapedLead format for response generation
-        const leadForResponse = {
-          ...lead,
-          priority: lead.priority as 'urgent' | 'high' | 'medium' | 'low' | undefined,
-        };
-        const response = await generateResponse(leadForResponse);
+        const response = await generateResponse(leadForAnalysis);
 
         return NextResponse.json({
           success: true,
