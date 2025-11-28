@@ -5,18 +5,23 @@ import {
   timestamp,
   serial,
   boolean,
+  real,
 } from 'drizzle-orm/pg-core';
 
 // Scraping Sessions - Track each scraping run
 export const scrapingSessions = pgTable('scraping_sessions', {
   id: serial('id').primaryKey(),
   location: text('location').notNull(),
-  status: text('status').notNull(), // 'running', 'completed', 'failed'
+  status: text('status').notNull(), // 'pending', 'running', 'completed', 'failed'
   totalLeadsFound: integer('total_leads_found').default(0).notNull(),
   sourcesScraped: text('sources_scraped').array(), // Array of source names
   startedAt: timestamp('started_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
   errorMessage: text('error_message'),
+  workerId: text('worker_id'), // Worker that processed this job
+  proxyUsed: text('proxy_used'), // Proxy URL used
+  retryCount: integer('retry_count').default(0).notNull(),
+  timeoutAt: timestamp('timeout_at'), // Job timeout
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -112,6 +117,44 @@ export const leadSourceAnalytics = pgTable('lead_source_analytics', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Worker Instances - Track worker processes
+export const workerInstances = pgTable('worker_instances', {
+  id: serial('id').primaryKey(),
+  workerId: text('worker_id').unique().notNull(),
+  status: text('status').notNull(), // 'running', 'idle', 'crashed', 'stopped'
+  lastHeartbeat: timestamp('last_heartbeat'),
+  jobsProcessed: integer('jobs_processed').default(0).notNull(),
+  errorsCount: integer('errors_count').default(0).notNull(),
+  currentJobId: integer('current_job_id'),
+  startedAt: timestamp('started_at').defaultNow().notNull(),
+  stoppedAt: timestamp('stopped_at'),
+});
+
+// Proxy Pool - Manage rotating proxies
+export const proxyPool = pgTable('proxy_pool', {
+  id: serial('id').primaryKey(),
+  proxyUrl: text('proxy_url').unique().notNull(),
+  status: text('status').notNull(), // 'active', 'failed', 'testing'
+  successRate: real('success_rate').default(0),
+  avgResponseTime: integer('avg_response_time'), // in ms
+  lastUsed: timestamp('last_used'),
+  lastHealthCheck: timestamp('last_health_check'),
+  failuresCount: integer('failures_count').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Scraper Metrics - Time-series metrics per source
+export const scraperMetrics = pgTable('scraper_metrics', {
+  id: serial('id').primaryKey(),
+  source: text('source').notNull(),
+  timestamp: timestamp('timestamp').defaultNow().notNull(),
+  requestsCount: integer('requests_count').default(0).notNull(),
+  successCount: integer('success_count').default(0).notNull(),
+  errorCount: integer('error_count').default(0).notNull(),
+  avgResponseTime: integer('avg_response_time'), // in ms
+  leadsFound: integer('leads_found').default(0).notNull(),
+});
+
 // Type exports
 export type ScrapingSession = typeof scrapingSessions.$inferSelect;
 export type NewScrapingSession = typeof scrapingSessions.$inferInsert;
@@ -130,3 +173,12 @@ export type NewLeadSource = typeof leadSources.$inferInsert;
 
 export type LeadSourceAnalytic = typeof leadSourceAnalytics.$inferSelect;
 export type NewLeadSourceAnalytic = typeof leadSourceAnalytics.$inferInsert;
+
+export type WorkerInstance = typeof workerInstances.$inferSelect;
+export type NewWorkerInstance = typeof workerInstances.$inferInsert;
+
+export type ProxyPool = typeof proxyPool.$inferSelect;
+export type NewProxyPool = typeof proxyPool.$inferInsert;
+
+export type ScraperMetric = typeof scraperMetrics.$inferSelect;
+export type NewScraperMetric = typeof scraperMetrics.$inferInsert;

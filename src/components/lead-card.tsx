@@ -65,8 +65,7 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
       style={{
         borderLeftColor: lead.score >= 80 ? "#ef4444" : lead.score >= 60 ? "#f97316" : "#3b82f6"
       }}
-      isPressable
-      onPress={() => onViewDetails(lead)}
+      onClick={() => onViewDetails(lead)}
     >
       <CardHeader className="flex flex-col items-start gap-2 pb-2">
         <div className="flex w-full items-start justify-between gap-2">
@@ -83,16 +82,18 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
                 {lead.score}
               </div>
               {onDelete && (
-                <Button
-                  isIconOnly
-                  size="sm"
-                  color="danger"
-                  variant="light"
-                  onPress={handleDelete}
-                  isLoading={isDeleting}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    color="danger"
+                    variant="light"
+                    onPress={handleDelete}
+                    isLoading={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </div>
             <Chip color={getPriorityColor(lead.priority)} size="sm" variant="flat">
@@ -142,6 +143,7 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
               startContent={<Phone className="h-3 w-3" />}
               as="a"
               href={`tel:${lead.phone}`}
+              onClick={(e) => e.stopPropagation()}
             >
               Call
             </Button>
@@ -155,6 +157,7 @@ export function LeadCard({ lead, onViewDetails, onDelete }: LeadCardProps) {
               startContent={<Mail className="h-3 w-3" />}
               as="a"
               href={`mailto:${lead.email}`}
+              onClick={(e) => e.stopPropagation()}
             >
               Email
             </Button>

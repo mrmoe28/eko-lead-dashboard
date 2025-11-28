@@ -439,6 +439,55 @@ export default function LiveScrapingPage() {
         </div>
       </div>
 
+      {/* Console */}
+      <Card className="overflow-hidden rounded-xl border-0 shadow-lg">
+        <div className="bg-black px-4 py-3 flex items-center gap-2 border-b border-gray-800 rounded-t-xl">
+          <Terminal className="w-4 h-4 text-green-400" />
+          <span className="text-sm font-medium text-gray-200">Console Output</span>
+          {logs.length > 0 && (
+            <span className="ml-auto text-xs text-gray-500">{logs.length} messages</span>
+          )}
+          {isConnected && (
+            <div className="flex items-center gap-2 ml-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-400">Live</span>
+            </div>
+          )}
+        </div>
+        <div
+          ref={consoleRef}
+          className="bg-black p-4 h-96 overflow-y-auto font-mono text-sm rounded-b-xl"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#374151 #000000'
+          }}
+        >
+          {logs.length === 0 ? (
+            <div className="text-gray-600 text-center py-8">
+              <Terminal className="w-12 h-12 mx-auto mb-3 text-gray-700" />
+              <p>No activity yet. Start a scraping session to see real-time logs.</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {logs.map((log) => (
+                <div key={log.id} className="flex items-start gap-2 text-sm leading-relaxed">
+                  <span className="text-gray-600 shrink-0 font-normal">
+                    [{formatTimestamp(log.timestamp)}]
+                  </span>
+                  <span className="shrink-0">{getLogStatusIcon(log.status)}</span>
+                  <span className="text-gray-300">
+                    <span className="text-cyan-400 font-semibold">{log.source}:</span> {log.message}
+                    {log.leadCount > 0 && (
+                      <span className="text-green-400 font-semibold"> ({log.leadCount} leads)</span>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Card>
+
       {/* Start Scraping Card */}
       <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <h2 className="text-xl font-semibold mb-4">Trigger Scraping Job</h2>
@@ -676,55 +725,6 @@ export default function LiveScrapingPage() {
           </div>
         </Card>
       )}
-
-      {/* Console */}
-      <Card className="overflow-hidden rounded-xl border-0 shadow-lg">
-        <div className="bg-black px-4 py-3 flex items-center gap-2 border-b border-gray-800 rounded-t-xl">
-          <Terminal className="w-4 h-4 text-green-400" />
-          <span className="text-sm font-medium text-gray-200">Console Output</span>
-          {logs.length > 0 && (
-            <span className="ml-auto text-xs text-gray-500">{logs.length} messages</span>
-          )}
-          {isConnected && (
-            <div className="flex items-center gap-2 ml-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-400">Live</span>
-            </div>
-          )}
-        </div>
-        <div
-          ref={consoleRef}
-          className="bg-black p-4 h-96 overflow-y-auto font-mono text-sm rounded-b-xl"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#374151 #000000'
-          }}
-        >
-          {logs.length === 0 ? (
-            <div className="text-gray-600 text-center py-8">
-              <Terminal className="w-12 h-12 mx-auto mb-3 text-gray-700" />
-              <p>No activity yet. Start a scraping session to see real-time logs.</p>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {logs.map((log) => (
-                <div key={log.id} className="flex items-start gap-2 text-sm leading-relaxed">
-                  <span className="text-gray-600 shrink-0 font-normal">
-                    [{formatTimestamp(log.timestamp)}]
-                  </span>
-                  <span className="shrink-0">{getLogStatusIcon(log.status)}</span>
-                  <span className="text-gray-300">
-                    <span className="text-cyan-400 font-semibold">{log.source}:</span> {log.message}
-                    {log.leadCount > 0 && (
-                      <span className="text-green-400 font-semibold"> ({log.leadCount} leads)</span>
-                    )}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </Card>
 
       {/* Recent Sessions */}
       <div>
