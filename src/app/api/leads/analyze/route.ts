@@ -39,7 +39,12 @@ export async function POST(request: NextRequest) {
     // Perform requested action
     switch (action) {
       case 'analyze': {
-        const analysis = await analyzeLead(lead);
+        // Convert database Lead to ScrapedLead format for analysis
+        const leadForAnalysis = {
+          ...lead,
+          priority: lead.priority as 'urgent' | 'high' | 'medium' | 'low' | undefined,
+        };
+        const analysis = await analyzeLead(leadForAnalysis);
 
         // Update lead with analysis results
         await db
@@ -63,7 +68,12 @@ export async function POST(request: NextRequest) {
       }
 
       case 'enrich': {
-        const enriched = await enrichLead(lead);
+        // Convert database Lead to ScrapedLead format for enrichment
+        const leadForEnrichment = {
+          ...lead,
+          priority: lead.priority as 'urgent' | 'high' | 'medium' | 'low' | undefined,
+        };
+        const enriched = await enrichLead(leadForEnrichment);
 
         // Update lead with enriched data
         const updates: any = {
@@ -87,7 +97,12 @@ export async function POST(request: NextRequest) {
       }
 
       case 'generate_response': {
-        const response = await generateResponse(lead);
+        // Convert database Lead to ScrapedLead format for response generation
+        const leadForResponse = {
+          ...lead,
+          priority: lead.priority as 'urgent' | 'high' | 'medium' | 'low' | undefined,
+        };
+        const response = await generateResponse(leadForResponse);
 
         return NextResponse.json({
           success: true,
