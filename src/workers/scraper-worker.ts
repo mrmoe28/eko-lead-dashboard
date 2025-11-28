@@ -3,7 +3,7 @@ import { JobQueue } from './queue/job-queue';
 import { BaseScraper } from '@/lib/scrapers/base-scraper';
 import { PermitsScraper } from './scrapers/permits.scraper';
 import { db } from '@/lib/db';
-import { workerInstances } from '@/lib/db/schema';
+import { workerInstances, leads } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { analyzeLead, enrichLead } from '@/lib/llm/lead-intelligence';
 
