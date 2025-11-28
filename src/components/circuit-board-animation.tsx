@@ -20,7 +20,7 @@ interface Spark {
 export function CircuitBoardAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [sparks, setSparks] = useState<Spark[]>([]);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   // Define circuit nodes in a loop pattern
   const nodes: CircuitNode[] = [
