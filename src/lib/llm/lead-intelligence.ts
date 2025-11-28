@@ -281,7 +281,7 @@ export async function batchAnalyzeLeads(
   const results = new Map<number, LeadAnalysis>();
 
   // Process in chunks to avoid overwhelming LLM
-  const chunks = [];
+  const chunks: Array<Partial<ScrapedLead>[]> = [];
   for (let i = 0; i < Math.min(leads.length, maxLeads); i += 5) {
     chunks.push(leads.slice(i, i + 5));
   }
