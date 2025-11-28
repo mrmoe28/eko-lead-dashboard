@@ -5,6 +5,7 @@ import { PermitsScraper } from './scrapers/permits.scraper';
 import { db } from '@/lib/db';
 import { workerInstances } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { analyzeLead, enrichLead } from '@/lib/llm/lead-intelligence';
 
 /**
  * Scraper Worker Process
@@ -213,6 +214,11 @@ export class ScraperWorker {
           if (result.leads.length > 0) {
             await this.queue.saveLeads(job.id, result.leads);
             allLeads.push(...result.leads);
+
+            // LLM Analysis: Analyze and enrich leads if enabled
+            if (process.env.LLM_ENABLED === 'true') {
+              await this.analyzeLeadsWithLLM(job.id, result.leads);
+            }
           }
 
           // Record metrics
@@ -257,6 +263,75 @@ export class ScraperWorker {
     } catch (error: any) {
       console.error(`[Worker ${this.workerId}] Job execution failed:`, error);
       await this.queue.failJob(job.id, error.message);
+    }
+  }
+
+  /**
+   * Analyze and enrich leads with LLM
+   */
+  private async analyzeLeadsWithLLM(jobId: number, leadsData: any[]): Promise<void> {
+    try {
+      await this.queue.addLog(
+        jobId,
+        'LLM',
+        `Analyzing ${leadsData.length} leads with AI...`,
+        'processing'
+      );
+
+      let analyzed = 0;
+      let enriched = 0;
+
+      // Process leads (limit to first 10 to avoid overwhelming LLM)
+      const leadsToProcess = leadsData.slice(0, 10);
+
+      for (const leadData of leadsToProcess) {
+        try {
+          // Analyze lead
+          const analysis = await analyzeLead(leadData);
+
+          // Enrich lead
+          const enrichment = await enrichLead(leadData);
+
+          // Update lead in database with analysis results
+          await db
+            .update(leads)
+            .set({
+              score: analysis.score,
+              priority: analysis.priority,
+              intent: analysis.intent,
+              whyHot: analysis.reasoning,
+              actionRequired: analysis.actionRequired,
+              revenueMin: analysis.estimatedRevenue.min,
+              revenueMax: analysis.estimatedRevenue.max,
+              // Add enriched data if available
+              ...(enrichment.phone && { phone: enrichment.phone }),
+              ...(enrichment.email && { email: enrichment.email }),
+              ...(enrichment.systemSize && { systemSize: enrichment.systemSize }),
+              updatedAt: new Date(),
+            })
+            .where(eq(leads.name, leadData.name)); // Match by name (temp solution)
+
+          analyzed++;
+          if (Object.keys(enrichment).length > 0) enriched++;
+        } catch (error: any) {
+          console.error(`[Worker ${this.workerId}] LLM analysis failed for lead:`, error.message);
+        }
+      }
+
+      await this.queue.addLog(
+        jobId,
+        'LLM',
+        `AI analysis complete: ${analyzed} analyzed, ${enriched} enriched`,
+        'success'
+      );
+    } catch (error: any) {
+      console.error(`[Worker ${this.workerId}] LLM batch analysis failed:`, error);
+      await this.queue.addLog(
+        jobId,
+        'LLM',
+        `AI analysis error: ${error.message}`,
+        'error'
+      );
     }
   }
 
