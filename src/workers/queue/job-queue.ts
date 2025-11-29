@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { scrapingSessions, scrapingLogs, leads, scraperMetrics } from '@/lib/db/schema';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, isNull } from 'drizzle-orm';
 import type { ScrapingSession } from '@/lib/db/schema';
 
 /**
@@ -24,6 +24,7 @@ export class JobQueue {
             eq(scrapingSessions.status, 'pending'),
             // Exclude jobs being processed by other workers
             or(
+              isNull(scrapingSessions.workerId),
               eq(scrapingSessions.workerId, ''),
               eq(scrapingSessions.workerId, workerId)
             )

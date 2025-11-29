@@ -221,13 +221,17 @@ export class ScraperWorker {
             }
           }
 
-          // Record metrics
+          // Record metrics (avoid division by zero)
+          const avgResponseTime = result.requestsMade > 0 
+            ? Math.floor(result.duration / result.requestsMade) 
+            : 0;
+          
           await this.queue.recordMetrics(
             result.source,
             result.requestsMade,
             Math.floor((result.successRate / 100) * result.requestsMade),
             result.errors.length,
-            Math.floor(result.duration / result.requestsMade),
+            avgResponseTime,
             result.totalLeads
           );
 
