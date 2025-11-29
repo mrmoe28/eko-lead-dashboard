@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { scrapingSessions } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { PermitsScraper } from '@/workers/scrapers/permits.scraper';
 
 /**
@@ -86,7 +87,7 @@ export async function GET(request: Request) {
         totalLeadsFound: result.totalLeads,
         sourcesScraped: [result.source],
       })
-      .where(scrapingSessions.id.eq(session.id));
+      .where(eq(scrapingSessions.id, session.id));
 
     console.log(`[Cron] Completed: ${result.totalLeads} leads found`);
 
