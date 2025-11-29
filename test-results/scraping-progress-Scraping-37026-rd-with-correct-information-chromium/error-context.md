@@ -1,0 +1,247 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e6]:
+          - generic [ref=e8]: EL
+          - generic [ref=e9]: Eko Leads
+        - navigation [ref=e10]:
+          - link "Landing Page" [ref=e11] [cursor=pointer]:
+            - /url: /landing
+            - img [ref=e12]
+            - generic [ref=e15]: Landing Page
+          - link "Dashboard" [ref=e16] [cursor=pointer]:
+            - /url: /
+            - img [ref=e17]
+            - generic [ref=e22]: Dashboard
+          - link "Live Scraping" [ref=e23] [cursor=pointer]:
+            - /url: /scraping
+            - img [ref=e24]
+            - generic [ref=e30]: Live Scraping
+          - link "Leads Library" [ref=e31] [cursor=pointer]:
+            - /url: /leads
+            - img [ref=e32]
+            - generic [ref=e36]: Leads Library
+          - link "YouTube Replies" [ref=e37] [cursor=pointer]:
+            - /url: /leads/youtube
+            - img [ref=e38]
+            - generic [ref=e41]: YouTube Replies
+          - link "Lead Sources" [ref=e42] [cursor=pointer]:
+            - /url: /sources
+            - img [ref=e43]
+            - generic [ref=e46]: Lead Sources
+          - link "Analytics" [ref=e47] [cursor=pointer]:
+            - /url: /analytics
+            - img [ref=e48]
+            - generic [ref=e50]: Analytics
+          - link "Assistant" [ref=e51] [cursor=pointer]:
+            - /url: /assistant
+            - img [ref=e52]
+            - generic [ref=e55]: Assistant
+          - link "Settings" [ref=e56] [cursor=pointer]:
+            - /url: /settings
+            - img [ref=e57]
+            - generic [ref=e60]: Settings
+        - button "Collapse" [ref=e62]:
+          - img [ref=e63]
+          - generic [ref=e65]: Collapse
+        - generic [ref=e67]: Eko Lead Generator v1.0
+    - main [ref=e69]:
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - heading "Live Scraping" [level=1] [ref=e73]
+            - paragraph [ref=e74]: Monitor real-time solar lead scraping across multiple sources
+          - button "Scraping Settings" [ref=e76]:
+            - img [ref=e77]
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - generic [ref=e84]: Console Output
+          - generic [ref=e86]:
+            - img [ref=e87]
+            - paragraph [ref=e89]: No activity yet. Start a scraping session to see real-time logs.
+        - generic [ref=e90]:
+          - heading "Trigger Scraping Job" [level=2] [ref=e91]
+          - generic [ref=e92]:
+            - textbox "Enter location (e.g., Georgia, Florida)" [disabled]: California
+            - button "Creating Job..." [disabled]:
+              - img
+              - text: Creating Job...
+            - button "Stop Scraping" [disabled]:
+              - img
+              - text: Stop Scraping
+        - generic [ref=e94]:
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - heading "Scraping Progress" [level=2] [ref=e97]:
+                - img [ref=e98]
+                - text: Scraping Progress
+              - paragraph [ref=e100]: Start a scraping session to track progress
+            - generic [ref=e102]: 9 Sources Ready
+          - generic [ref=e103]:
+            - generic [ref=e105]:
+              - generic [ref=e107]:
+                - img [ref=e109]
+                - generic [ref=e112]: Building Permits
+              - generic [ref=e114]:
+                - generic [ref=e115]: ◦ Waiting...
+                - generic [ref=e116]: 0%
+            - generic [ref=e118]:
+              - generic [ref=e120]:
+                - img [ref=e122]
+                - generic [ref=e124]: Incentives
+              - generic [ref=e126]:
+                - generic [ref=e127]: ◦ Waiting...
+                - generic [ref=e128]: 0%
+            - generic [ref=e130]:
+              - generic [ref=e132]:
+                - img [ref=e134]
+                - generic [ref=e136]: Reddit
+              - generic [ref=e138]:
+                - generic [ref=e139]: ◦ Waiting...
+                - generic [ref=e140]: 0%
+            - generic [ref=e142]:
+              - generic [ref=e144]:
+                - img [ref=e146]
+                - generic [ref=e147]: Craigslist
+              - generic [ref=e149]:
+                - generic [ref=e150]: ◦ Waiting...
+                - generic [ref=e151]: 0%
+            - generic [ref=e153]:
+              - generic [ref=e155]:
+                - img [ref=e157]
+                - generic [ref=e159]: Twitter/X
+              - generic [ref=e161]:
+                - generic [ref=e162]: ◦ Waiting...
+                - generic [ref=e163]: 0%
+            - generic [ref=e165]:
+              - generic [ref=e167]:
+                - img [ref=e169]
+                - generic [ref=e171]: Yelp
+              - generic [ref=e173]:
+                - generic [ref=e174]: ◦ Waiting...
+                - generic [ref=e175]: 0%
+            - generic [ref=e177]:
+              - generic [ref=e179]:
+                - img [ref=e181]
+                - generic [ref=e184]: Quora
+              - generic [ref=e186]:
+                - generic [ref=e187]: ◦ Waiting...
+                - generic [ref=e188]: 0%
+            - generic [ref=e190]:
+              - generic [ref=e192]:
+                - img [ref=e194]
+                - generic [ref=e199]: Facebook
+              - generic [ref=e201]:
+                - generic [ref=e202]: ◦ Waiting...
+                - generic [ref=e203]: 0%
+            - generic [ref=e205]:
+              - generic [ref=e207]:
+                - img [ref=e209]
+                - generic [ref=e212]: Nextdoor
+              - generic [ref=e214]:
+                - generic [ref=e215]: ◦ Waiting...
+                - generic [ref=e216]: 0%
+        - generic [ref=e217]:
+          - generic [ref=e218]:
+            - heading "Recent Sessions" [level=2] [ref=e219]
+            - button "Clear All Pending" [ref=e220]
+          - generic [ref=e221]:
+            - generic [ref=e222]:
+              - generic [ref=e223] [cursor=pointer]:
+                - generic [ref=e224]:
+                  - generic [ref=e225]:
+                    - generic [ref=e226]: "Session #49"
+                    - generic [ref=e227]: Florida
+                  - generic [ref=e228]: pending
+                - generic [ref=e229]:
+                  - generic [ref=e230]: "Leads: 0"
+                  - generic [ref=e231]: 11/29/2025
+              - button "Delete" [ref=e233]
+            - generic [ref=e234]:
+              - generic [ref=e235] [cursor=pointer]:
+                - generic [ref=e236]:
+                  - generic [ref=e237]:
+                    - generic [ref=e238]: "Session #48"
+                    - generic [ref=e239]: Georgia
+                  - generic [ref=e240]: completed
+                - generic [ref=e241]:
+                  - generic [ref=e242]: "Leads: 8"
+                  - generic [ref=e243]: 11/29/2025
+                  - generic [ref=e244]: Double-click to view details
+              - button "Delete" [ref=e246]
+            - generic [ref=e247]:
+              - generic [ref=e248] [cursor=pointer]:
+                - generic [ref=e249]:
+                  - generic [ref=e250]:
+                    - generic [ref=e251]: "Session #47"
+                    - generic [ref=e252]: Florida
+                  - generic [ref=e253]: completed
+                - generic [ref=e254]:
+                  - generic [ref=e255]: "Leads: 9"
+                  - generic [ref=e256]: 11/29/2025
+                  - generic [ref=e257]: Double-click to view details
+              - button "Delete" [ref=e259]
+            - generic [ref=e260]:
+              - generic [ref=e261] [cursor=pointer]:
+                - generic [ref=e262]:
+                  - generic [ref=e263]:
+                    - generic [ref=e264]: "Session #46"
+                    - generic [ref=e265]: Georgia
+                  - generic [ref=e266]: completed
+                - generic [ref=e267]:
+                  - generic [ref=e268]: "Leads: 14"
+                  - generic [ref=e269]: 11/29/2025
+                  - generic [ref=e270]: Double-click to view details
+              - button "Delete" [ref=e272]
+            - generic [ref=e273]:
+              - generic [ref=e274] [cursor=pointer]:
+                - generic [ref=e275]:
+                  - generic [ref=e276]:
+                    - generic [ref=e277]: "Session #45"
+                    - generic [ref=e278]: Georgia
+                  - generic [ref=e279]: completed
+                - generic [ref=e280]:
+                  - generic [ref=e281]: "Leads: 0"
+                  - generic [ref=e282]: 11/29/2025
+                  - generic [ref=e283]: Double-click to view details
+              - button "Delete" [ref=e285]
+            - generic [ref=e286]:
+              - generic [ref=e287] [cursor=pointer]:
+                - generic [ref=e288]:
+                  - generic [ref=e289]:
+                    - generic [ref=e290]: "Session #44"
+                    - generic [ref=e291]: Georgia
+                  - generic [ref=e292]: completed
+                - generic [ref=e293]:
+                  - generic [ref=e294]: "Leads: 0"
+                  - generic [ref=e295]: 11/29/2025
+                  - generic [ref=e296]: Double-click to view details
+              - button "Delete" [ref=e298]
+        - generic [ref=e299]:
+          - heading "Tips" [level=3] [ref=e300]
+          - list [ref=e301]:
+            - listitem [ref=e302]:
+              - generic [ref=e303]: •
+              - generic [ref=e304]: The job watcher polls every 5 seconds for new jobs from the dashboard
+            - listitem [ref=e305]:
+              - generic [ref=e306]: •
+              - generic [ref=e307]:
+                - text: "You can run multiple scrapers manually if needed:"
+                - code [ref=e308]: npm run scrape Florida
+            - listitem [ref=e309]:
+              - generic [ref=e310]: •
+              - generic [ref=e311]: All leads are automatically saved to the database and appear in the Leads Library
+            - listitem [ref=e312]:
+              - generic [ref=e313]: •
+              - generic [ref=e314]: Sessions are tracked in Recent Sessions below for historical reference
+  - button "Open AI assistant" [ref=e315]:
+    - img [ref=e316]
+  - button "Open Next.js Dev Tools" [ref=e324] [cursor=pointer]:
+    - img [ref=e325]
+  - alert [ref=e328]
+```

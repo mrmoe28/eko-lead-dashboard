@@ -86,6 +86,13 @@ export default function LiveScrapingPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch historical progress for completed sessions
+  useEffect(() => {
+    if (currentSession && (currentSession.status === 'completed' || currentSession.status === 'failed')) {
+      fetchHistoricalProgress(currentSession.id);
+    }
+  }, [currentSession?.id, currentSession?.status]);
+
   // Fetch lead sources from database
   async function fetchLeadSources() {
     try {
@@ -109,6 +116,24 @@ export default function LiveScrapingPage() {
       console.error('Failed to fetch lead sources:', error);
     }
   }
+
+  // Load progress from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('scrapingProgress');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // Only load if it's from the last 24 hours to avoid stale data
+          if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+            setSourceProgress(parsed.progress || {});
+          }
+        } catch (error) {
+          console.error('Failed to load progress from localStorage:', error);
+        }
+      }
+    }
+  }, []);
 
   // Update source progress from logs
   useEffect(() => {
@@ -141,6 +166,14 @@ export default function LiveScrapingPage() {
 
     console.log('[Progress] Updated progress:', progress);
     setSourceProgress(progress);
+
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('scrapingProgress', JSON.stringify({
+        progress,
+        timestamp: Date.now()
+      }));
+    }
   }, [logs]);
 
   // Connect to SSE stream when current session changes
@@ -212,6 +245,44 @@ export default function LiveScrapingPage() {
     }
   }
 
+  async function fetchHistoricalProgress(sessionId: number) {
+    try {
+      const response = await fetch(`/api/scraping/logs?sessionId=${sessionId}`);
+      const data = await response.json();
+      
+      if (data.logs) {
+        const progress: Record<string, number> = {};
+        
+        data.logs.forEach((log: ScrapingLog) => {
+          const logSource = log.source.toLowerCase();
+          let sourceId = '';
+          
+          if (logSource.includes('permit')) sourceId = 'permits';
+          else if (logSource.includes('incentive')) sourceId = 'incentives';
+          else if (logSource.includes('reddit')) sourceId = 'reddit';
+          else if (logSource.includes('craigslist')) sourceId = 'craigslist';
+          else if (logSource.includes('twitter') || logSource.includes('x')) sourceId = 'twitter';
+          else if (logSource.includes('yelp')) sourceId = 'yelp';
+          else if (logSource.includes('quora')) sourceId = 'quora';
+          else if (logSource.includes('facebook')) sourceId = 'facebook';
+          else if (logSource.includes('nextdoor')) sourceId = 'nextdoor';
+
+          if (sourceId) {
+            if (log.status === 'success') {
+              progress[sourceId] = 100;
+            } else if (log.status === 'processing') {
+              progress[sourceId] = 50;
+            }
+          }
+        });
+
+        setSourceProgress(progress);
+      }
+    } catch (error) {
+      console.error('Failed to fetch historical progress:', error);
+    }
+  }
+
   async function deleteSession(sessionId: number) {
     if (!confirm(`Delete session #${sessionId}?`)) return;
 
@@ -265,6 +336,10 @@ export default function LiveScrapingPage() {
       });
 
       if (response.ok) {
+        // Clear progress for new session
+        setSourceProgress({});
+        setLogs([]);
+        
         // Wait a moment then refresh sessions
         setTimeout(() => {
           fetchSessions();
@@ -756,6 +831,12 @@ export default function LiveScrapingPage() {
                 onClick={() => {
                   setCurrentSession(session);
                   setLogs([]); // Clear logs when switching sessions
+                  // Clear progress for running sessions, fetch historical for completed ones
+                  if (session.status === 'running' || session.status === 'pending') {
+                    setSourceProgress({});
+                  } else {
+                    fetchHistoricalProgress(session.id);
+                  }
                 }}
                 onDoubleClick={() => {
                   // Navigate to session detail page on double-click
