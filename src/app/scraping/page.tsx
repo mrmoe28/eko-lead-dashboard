@@ -298,6 +298,12 @@ export default function LiveScrapingPage() {
   async function fetchHistoricalProgress(sessionId: number) {
     try {
       const response = await fetch(`/api/scraping/logs?sessionId=${sessionId}`);
+      
+      if (!response.ok) {
+        console.warn(`Failed to fetch logs: ${response.status} ${response.statusText}`);
+        return;
+      }
+      
       const data = await response.json();
       
       if (data.logs) {
