@@ -111,3 +111,36 @@ Workers cannot run on Vercel (serverless platform). Use Vercel Cron Jobs instead
 
 ---
 
+## Drizzle ORM: Incorrect WHERE Clause Syntax
+
+**Error:**
+```
+Type error: Property 'eq' does not exist on type 'PgColumn<{ name: "id"; tableName: "scraping_sessions"...
+```
+
+**Problem:**
+Using incorrect Drizzle ORM syntax for WHERE clauses. The `.eq()` method doesn't exist on columns.
+
+**Incorrect Code:**
+```typescript
+.where(scrapingSessions.id.eq(session.id))
+```
+
+**Solution:**
+Import and use the `eq` function from `drizzle-orm`:
+
+```typescript
+import { eq } from 'drizzle-orm';
+
+.where(eq(scrapingSessions.id, session.id))
+```
+
+**Files Changed:**
+- `src/app/api/cron/scrape/route.ts`: Added `eq` import and fixed WHERE clause
+
+**Key Concept:**
+Drizzle ORM uses helper functions (`eq`, `gt`, `lt`, `and`, `or`, etc.) rather than methods on columns.
+
+**Date Fixed:** 2025-11-29
+
+---
