@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { scrapingSessions } from '@/lib/db/schema';
+import { scrapingSessions, scrapingLogs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { PermitsScraper } from '@/workers/scrapers/permits.scraper';
+import { RedditScraper } from '@/workers/scrapers/reddit.scraper';
+import { CraigslistScraper } from '@/workers/scrapers/craigslist.scraper';
+import { IncentivesScraper } from '@/workers/scrapers/incentives.scraper';
+import { YelpScraper } from '@/workers/scrapers/yelp.scraper';
+import { BaseScraper } from '@/lib/scrapers/base-scraper';
 
 /**
  * Vercel Cron Job Endpoint
@@ -43,39 +48,88 @@ export async function GET(request: Request) {
       })
       .returning();
 
-    // Execute scraper directly (serverless function)
-    const scraper = new PermitsScraper();
-    const result = await scraper.execute(location);
+    // Initialize all scrapers
+    const scrapers: Map<string, BaseScraper> = new Map([
+      ['permits', new PermitsScraper()],
+      ['reddit', new RedditScraper()],
+      ['craigslist', new CraigslistScraper()],
+      ['incentives', new IncentivesScraper()],
+      ['yelp', new YelpScraper()],
+    ]);
 
-    // Save leads
-    if (result.leads.length > 0) {
-      // Import leads table and save
-      const { leads: leadsTable } = await import('@/lib/db/schema');
-      
-      await db.insert(leadsTable).values(
-        result.leads.map(lead => ({
-          name: lead.name,
-          location: lead.location,
-          score: lead.score,
-          priority: lead.priority,
-          source: lead.source,
-          phone: lead.phone,
-          email: lead.email,
-          request: lead.request,
-          whyHot: lead.whyHot,
-          actionRequired: lead.actionRequired,
-          postedTime: lead.postedTime,
-          profileUrl: lead.profileUrl,
-          originalPostUrl: lead.originalPostUrl,
-          revenueMin: lead.revenueMin,
-          revenueMax: lead.revenueMax,
-          address: lead.address,
-          systemSize: lead.systemSize,
-          permitNumber: lead.permitNumber,
-          message: lead.message,
-          intent: lead.intent,
-        }))
-      );
+    const allLeads: any[] = [];
+    const sourcesScraped: string[] = [];
+    const { leads: leadsTable } = await import('@/lib/db/schema');
+
+    // Run each scraper
+    for (const [key, scraper] of scrapers) {
+      try {
+        console.log(`[Cron] Running ${key} scraper...`);
+        
+        // Log start
+        await db.insert(scrapingLogs).values({
+          sessionId: session.id,
+          source: key.charAt(0).toUpperCase() + key.slice(1),
+          message: 'Starting scraper...',
+          status: 'processing',
+          leadCount: 0,
+        });
+
+        const result = await scraper.execute(location);
+
+        // Save leads
+        if (result.leads.length > 0) {
+          await db.insert(leadsTable).values(
+            result.leads.map(lead => ({
+              name: lead.name,
+              location: lead.location,
+              score: lead.score,
+              priority: lead.priority,
+              source: lead.source,
+              phone: lead.phone,
+              email: lead.email,
+              request: lead.request,
+              whyHot: lead.whyHot,
+              actionRequired: lead.actionRequired,
+              postedTime: lead.postedTime,
+              profileUrl: lead.profileUrl,
+              originalPostUrl: lead.originalPostUrl,
+              revenueMin: lead.revenueMin,
+              revenueMax: lead.revenueMax,
+              address: lead.address,
+              systemSize: lead.systemSize,
+              permitNumber: lead.permitNumber,
+              message: lead.message,
+              intent: lead.intent,
+              sessionId: session.id,
+            }))
+          );
+          allLeads.push(...result.leads);
+        }
+
+        // Log success
+        await db.insert(scrapingLogs).values({
+          sessionId: session.id,
+          source: result.source,
+          message: `Completed: ${result.totalLeads} leads found`,
+          status: 'success',
+          leadCount: result.totalLeads,
+        });
+
+        sourcesScraped.push(result.source);
+        console.log(`[Cron] ${key}: ${result.totalLeads} leads found`);
+      } catch (error: any) {
+        console.error(`[Cron] ${key} scraper failed:`, error.message);
+        
+        // Log error
+        await db.insert(scrapingLogs).values({
+          sessionId: session.id,
+          source: key.charAt(0).toUpperCase() + key.slice(1),
+          message: `Error: ${error.message}`,
+          status: 'error',
+          leadCount: 0,
+        });
+      }
     }
 
     // Update session as completed
@@ -84,19 +138,19 @@ export async function GET(request: Request) {
       .set({
         status: 'completed',
         completedAt: new Date(),
-        totalLeadsFound: result.totalLeads,
-        sourcesScraped: [result.source],
+        totalLeadsFound: allLeads.length,
+        sourcesScraped,
       })
       .where(eq(scrapingSessions.id, session.id));
 
-    console.log(`[Cron] Completed: ${result.totalLeads} leads found`);
+    console.log(`[Cron] Completed: ${allLeads.length} total leads from ${sourcesScraped.length} sources`);
 
     return NextResponse.json({
       success: true,
       sessionId: session.id,
       location,
-      leadsFound: result.totalLeads,
-      source: result.source,
+      leadsFound: allLeads.length,
+      sources: sourcesScraped,
     });
   } catch (error: any) {
     console.error('[Cron] Error:', error);

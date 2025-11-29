@@ -2,6 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { JobQueue } from './queue/job-queue';
 import { BaseScraper } from '@/lib/scrapers/base-scraper';
 import { PermitsScraper } from './scrapers/permits.scraper';
+import { RedditScraper } from './scrapers/reddit.scraper';
+import { CraigslistScraper } from './scrapers/craigslist.scraper';
+import { IncentivesScraper } from './scrapers/incentives.scraper';
+import { YelpScraper } from './scrapers/yelp.scraper';
 import { db } from '@/lib/db';
 import { workerInstances, leads } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -33,12 +37,17 @@ export class ScraperWorker {
   private initializeScrapers(): Map<string, BaseScraper> {
     const scrapers = new Map<string, BaseScraper>();
 
-    // Register scrapers
+    // Register all scrapers
     scrapers.set('permits', new PermitsScraper());
-    // Add more scrapers here as they're implemented
-    // scrapers.set('reddit', new RedditScraper());
-    // scrapers.set('yelp', new YelpScraper());
+    scrapers.set('reddit', new RedditScraper());
+    scrapers.set('craigslist', new CraigslistScraper());
+    scrapers.set('incentives', new IncentivesScraper());
+    scrapers.set('yelp', new YelpScraper());
+    
+    // Note: Twitter, Facebook, Quora, Nextdoor require special API access
+    // and are not implemented yet
 
+    console.log(`[Worker] Initialized ${scrapers.size} scrapers: ${Array.from(scrapers.keys()).join(', ')}`);
     return scrapers;
   }
 
@@ -187,8 +196,11 @@ export class ScraperWorker {
     const sourcesScraped: string[] = [];
 
     try {
-      // Get enabled scrapers (for now, just use permits)
-      const scrapersToRun = ['permits']; // In production, this would come from job config
+      // Get all registered scrapers to run
+      // You can customize this based on job config or environment
+      const scrapersToRun = Array.from(this.scrapers.keys());
+      
+      console.log(`[Worker ${this.workerId}] Running ${scrapersToRun.length} scrapers: ${scrapersToRun.join(', ')}`);
 
       for (const scraperKey of scrapersToRun) {
         const scraper = this.scrapers.get(scraperKey);

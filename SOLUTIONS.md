@@ -145,6 +145,47 @@ Drizzle ORM uses helper functions (`eq`, `gt`, `lt`, `and`, `or`, etc.) rather t
 
 ---
 
+## Scraper Sources Implementation Guide
+
+**Issue:** Only the Building Permits scraper was implemented. Other sources (Reddit, Craigslist, Yelp, etc.) were just UI placeholders.
+
+**Solution:** Implemented 5 scrapers with mock data support:
+
+| Scraper | File | API Required | Notes |
+|---------|------|--------------|-------|
+| Building Permits | `permits.scraper.ts` | No | Scrapes public county databases |
+| Reddit | `reddit.scraper.ts` | No | Uses public JSON API |
+| Craigslist | `craigslist.scraper.ts` | No | Web scraping, rate-limited |
+| Incentives | `incentives.scraper.ts` | DSIRE (free) | Solar incentive opportunities |
+| Yelp | `yelp.scraper.ts` | Yes (free tier) | Yelp Fusion API |
+
+**Environment Variables:**
+```bash
+# Enable real scraping (default: mock data)
+USE_MOCK_SCRAPER=false
+
+# Yelp API (optional)
+YELP_API_KEY=your-yelp-fusion-api-key
+```
+
+**Not Implemented (Require Special Access):**
+- Twitter/X: Requires $100+/month API access
+- Facebook: Requires business verification
+- Quora: Heavy anti-scraping measures
+- Nextdoor: Requires verified address
+
+**Files Changed:**
+- Created `src/workers/scrapers/reddit.scraper.ts`
+- Created `src/workers/scrapers/craigslist.scraper.ts`
+- Created `src/workers/scrapers/incentives.scraper.ts`
+- Created `src/workers/scrapers/yelp.scraper.ts`
+- Updated `src/workers/scraper-worker.ts` to register all scrapers
+- Updated `src/app/api/cron/scrape/route.ts` to run all scrapers
+
+**Date Fixed:** 2025-11-29
+
+---
+
 ## SSE (Server-Sent Events): Error Shows Empty Object `{}`
 
 **Error:**
