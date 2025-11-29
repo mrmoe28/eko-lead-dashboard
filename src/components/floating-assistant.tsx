@@ -62,13 +62,23 @@ export function FloatingAssistant() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Function execution failed");
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const error = await response.json();
+          errorMessage = error.error || error.message || errorMessage;
+        } catch {
+          errorMessage = `${errorMessage}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || "Function execution failed");
+      }
       return data.result;
     } catch (error: any) {
+      console.error(`Function ${functionName} error:`, error);
       throw error;
     }
   };
@@ -94,11 +104,23 @@ export function FloatingAssistant() {
       let functionArgs: any = {};
 
       // Simple intent detection for function calls
-      if (lowerInput.includes("start scraping") || lowerInput.includes("scrape")) {
-        const locationMatch = currentInput.match(/(?:for|in|at)\s+([A-Za-z\s,]+(?:,\s*[A-Z]{2})?)/i);
+      if (lowerInput.includes("start scraping") || lowerInput.includes("start scraper") || 
+          lowerInput.includes("start the scraper") || lowerInput.includes("begin scraping") ||
+          (lowerInput.includes("scrape") && (lowerInput.includes("start") || lowerInput.includes("begin")))) {
+        const locationMatch = currentInput.match(/(?:for|in|at|location:?)\s+([A-Za-z\s,]+(?:,\s*[A-Z]{2})?)/i);
         if (locationMatch) {
           functionToCall = "start_scraping";
           functionArgs = { location: locationMatch[1].trim() };
+        } else {
+          // Ask for location if not provided
+          const assistantMessage: Message = {
+            role: "assistant",
+            content: "I'd be happy to start scraping! Which location would you like me to scrape? (e.g., 'Atlanta, GA', 'Miami, FL')",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          setIsLoading(false);
+          return;
         }
       } else if (lowerInput.includes("analyze lead") || lowerInput.includes("analyze lead id")) {
         const idMatch = currentInput.match(/(?:lead|id)\s*#?(\d+)/i);
@@ -201,36 +223,47 @@ export function FloatingAssistant() {
         }
       } else {
         // Regular chat completion
-        const response = await fetch("/api/assistant", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messages: [...messages, userMessage].map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-          }),
-        });
+        try {
+          const response = await fetch("/api/assistant", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messages: [...messages, userMessage].map((m) => ({
+                role: m.role,
+                content: m.content,
+              })),
+            }),
+          });
 
-        if (!response.ok) {
-          throw new Error("Failed to get response");
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          const assistantMessage: Message = {
+            role: "assistant",
+            content: data.message || "I'm sorry, I couldn't process that.",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+        } catch (chatError: any) {
+          console.error("Chat API error:", chatError);
+          const errorMessage: Message = {
+            role: "assistant",
+            content: `I encountered an error: ${chatError.message || "Failed to get response"}. Please check your LLM configuration or try again.`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, errorMessage]);
         }
-
-        const data = await response.json();
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: data.message || "I'm sorry, I couldn't process that.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
       const errorMessage: Message = {
         role: "assistant",
-        content: "Sorry, I'm having trouble connecting. Please try again later.",
+        content: `Error: ${error.message || "Sorry, I'm having trouble connecting. Please try again later."}`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
