@@ -38,37 +38,35 @@ export class RedditScraper extends BaseScraper {
     try {
       this.log(`Searching Reddit for solar leads in ${location}`);
 
-      const useMockData = process.env.USE_MOCK_SCRAPER !== 'false';
-
-      if (useMockData) {
-        this.log(`Using mock data mode for ${location}`);
-        const mockLeads = this.generateMockLeads(location);
-        leads.push(...mockLeads);
-      } else {
-        // Search subreddits for location-specific solar posts
-        for (const subreddit of this.subreddits) {
-          try {
-            const subredditLeads = await this.searchSubreddit(subreddit, location);
-            leads.push(...subredditLeads);
-          } catch (error: any) {
-            this.logError(`Failed to search r/${subreddit}: ${error.message}`);
-          }
+      // Real scraping only - no mock data
+      // Search subreddits for location-specific solar posts
+      for (const subreddit of this.subreddits) {
+        try {
+          const subredditLeads = await this.searchSubreddit(subreddit, location);
+          leads.push(...subredditLeads);
+        } catch (error: any) {
+          this.logError(`Failed to search r/${subreddit}: ${error.message}`);
         }
+      }
 
-        // Also search with specific terms
-        for (const term of this.searchTerms.slice(0, 3)) { // Limit to avoid rate limits
-          try {
-            const searchLeads = await this.searchReddit(`${term} ${location}`);
-            leads.push(...searchLeads);
-          } catch (error: any) {
-            this.logError(`Failed to search "${term}": ${error.message}`);
-          }
+      // Also search with specific terms
+      for (const term of this.searchTerms.slice(0, 3)) { // Limit to avoid rate limits
+        try {
+          const searchLeads = await this.searchReddit(`${term} ${location}`);
+          leads.push(...searchLeads);
+        } catch (error: any) {
+          this.logError(`Failed to search "${term}": ${error.message}`);
         }
       }
 
       // Deduplicate by post URL
       const uniqueLeads = this.deduplicateLeads(leads);
-      this.log(`Found ${uniqueLeads.length} unique Reddit leads in ${location}`);
+      
+      if (uniqueLeads.length === 0) {
+        this.log(`No Reddit leads found for ${location} - real data returned empty`);
+      } else {
+        this.log(`Found ${uniqueLeads.length} real Reddit leads in ${location}`);
+      }
 
       return uniqueLeads;
     } catch (error: any) {
@@ -275,72 +273,6 @@ export class RedditScraper extends BaseScraper {
       }
       if (lead.originalPostUrl) seen.add(lead.originalPostUrl);
       return true;
-    });
-  }
-
-  /**
-   * Generate mock leads for testing
-   */
-  private generateMockLeads(location: string): ScrapedLead[] {
-    const mockPosts = [
-      {
-        author: 'SolarCurious2024',
-        title: `Looking for solar installer recommendations in ${location}`,
-        body: 'Just bought a house and want to go solar. Anyone have experience with local installers?',
-        subreddit: 'solar',
-        age: 2,
-      },
-      {
-        author: 'HomeOwnerHelp',
-        title: `Solar quote seems high - ${location} area`,
-        body: 'Got a quote for $25k for a 8kW system. Is this reasonable? Looking for other opinions.',
-        subreddit: 'homeowners',
-        age: 1,
-      },
-      {
-        author: 'GreenEnergy_Fan',
-        title: `Best solar companies in ${location}?`,
-        body: 'Doing research before getting quotes. Which companies have good reviews here?',
-        subreddit: 'solar',
-        age: 3,
-      },
-      {
-        author: 'DIYSolarNewbie',
-        title: `Thinking about going solar - ${location}`,
-        body: 'We have a south-facing roof and high electric bills. Is solar worth it in our area?',
-        subreddit: 'SolarDIY',
-        age: 5,
-      },
-      {
-        author: 'EcoFriendlyHome',
-        title: `Need help choosing between solar quotes - ${location}`,
-        body: 'Got 3 quotes ranging from $18k to $28k. Not sure which to go with. Any advice?',
-        subreddit: 'HomeImprovement',
-        age: 1,
-      },
-    ];
-
-    return mockPosts.map((post, index) => {
-      const lead: ScrapedLead = {
-        name: post.author,
-        location: location,
-        request: `${post.title} - ${post.body}`,
-        source: this.source,
-        score: 0,
-        priority: 'medium',
-        originalPostUrl: `https://reddit.com/r/${post.subreddit}/comments/abc${index}`,
-        profileUrl: `https://reddit.com/u/${post.author}`,
-        whyHot: 'Actively seeking solar information',
-        actionRequired: 'Respond with helpful advice and offer consultation',
-        postedTime: `${post.age} days ago`,
-        message: post.body,
-        intent: 'pricing_inquiry',
-      };
-
-      lead.score = this.calculateLeadScore(lead);
-      lead.priority = this.determinePriority(lead.score, false);
-
-      return lead;
     });
   }
 }

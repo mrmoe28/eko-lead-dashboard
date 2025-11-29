@@ -149,24 +149,32 @@ Drizzle ORM uses helper functions (`eq`, `gt`, `lt`, `and`, `or`, etc.) rather t
 
 **Issue:** Only the Building Permits scraper was implemented. Other sources (Reddit, Craigslist, Yelp, etc.) were just UI placeholders.
 
-**Solution:** Implemented 5 scrapers with mock data support:
+**Solution:** Implemented 5 scrapers - **REAL DATA ONLY, NO MOCK DATA**
 
-| Scraper | File | API Required | Notes |
-|---------|------|--------------|-------|
-| Building Permits | `permits.scraper.ts` | No | Scrapes public county databases |
-| Reddit | `reddit.scraper.ts` | No | Uses public JSON API |
-| Craigslist | `craigslist.scraper.ts` | No | Web scraping, rate-limited |
-| Incentives | `incentives.scraper.ts` | DSIRE (free) | Solar incentive opportunities |
-| Yelp | `yelp.scraper.ts` | Yes (free tier) | Yelp Fusion API |
+| Scraper | File | API/Config Required | What It Scrapes |
+|---------|------|---------------------|-----------------|
+| Building Permits | `permits.scraper.ts` | Permit URLs in config | County permit databases |
+| Reddit | `reddit.scraper.ts` | None (public API) | Solar-related posts on Reddit |
+| Craigslist | `craigslist.scraper.ts` | None | "Services wanted" solar posts |
+| Incentives | `incentives.scraper.ts` | DSIRE API key | Solar incentive databases |
+| Yelp | `yelp.scraper.ts` | YELP_API_KEY | Solar company reviews |
+
+**Important:** All scrapers return **REAL DATA ONLY**. If data is not available (missing API keys, no results), they return empty with a clear log message. No mock/fake data is generated.
 
 **Environment Variables:**
 ```bash
-# Enable real scraping (default: mock data)
-USE_MOCK_SCRAPER=false
-
-# Yelp API (optional)
+# Yelp API (required for Yelp scraper)
 YELP_API_KEY=your-yelp-fusion-api-key
+
+# Note: USE_MOCK_SCRAPER has been REMOVED - all scrapers use real data only
 ```
+
+**What Happens When Data Is Unavailable:**
+- Permits: "No permit database URLs configured for {location} - data not available"
+- Reddit: "No Reddit leads found for {location} - real data returned empty"
+- Craigslist: "No Craigslist cities mapped for {location} - data not available"
+- Incentives: "No incentive data found for {location} - DSIRE API key required"
+- Yelp: "No Yelp API key configured - data not available"
 
 **Not Implemented (Require Special Access):**
 - Twitter/X: Requires $100+/month API access

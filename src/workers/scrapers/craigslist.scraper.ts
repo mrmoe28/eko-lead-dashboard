@@ -33,32 +33,30 @@ export class CraigslistScraper extends BaseScraper {
     try {
       this.log(`Searching Craigslist for solar leads in ${location}`);
 
-      const useMockData = process.env.USE_MOCK_SCRAPER !== 'false';
+      // Real scraping only - no mock data
+      const cities = this.locationToCities[location] || [];
+      
+      if (cities.length === 0) {
+        this.log(`No Craigslist cities mapped for ${location} - data not available`);
+        return leads;
+      }
 
-      if (useMockData) {
-        this.log(`Using mock data mode for ${location}`);
-        const mockLeads = this.generateMockLeads(location);
-        leads.push(...mockLeads);
-      } else {
-        const cities = this.locationToCities[location] || [];
-        
-        if (cities.length === 0) {
-          this.log(`No Craigslist cities mapped for ${location}, using search`);
-          return leads;
-        }
-
-        // Search services wanted section for each city
-        for (const city of cities.slice(0, 3)) { // Limit to avoid rate limits
-          try {
-            const cityLeads = await this.searchCity(city, location);
-            leads.push(...cityLeads);
-          } catch (error: any) {
-            this.logError(`Failed to search ${city}: ${error.message}`);
-          }
+      // Search services wanted section for each city
+      for (const city of cities.slice(0, 3)) { // Limit to avoid rate limits
+        try {
+          const cityLeads = await this.searchCity(city, location);
+          leads.push(...cityLeads);
+        } catch (error: any) {
+          this.logError(`Failed to search ${city}: ${error.message}`);
         }
       }
 
-      this.log(`Found ${leads.length} Craigslist leads in ${location}`);
+      if (leads.length === 0) {
+        this.log(`No Craigslist leads found for ${location} - real data returned empty`);
+      } else {
+        this.log(`Found ${leads.length} real Craigslist leads in ${location}`);
+      }
+      
       return leads;
     } catch (error: any) {
       this.logError(`Craigslist scraping failed: ${error.message}`);
@@ -209,64 +207,6 @@ export class CraigslistScraper extends BaseScraper {
     }
     
     return 'general_inquiry';
-  }
-
-  /**
-   * Generate mock leads for testing
-   */
-  private generateMockLeads(location: string): ScrapedLead[] {
-    const cities = this.locationToCities[location] || ['city'];
-    const city = cities[0];
-
-    const mockListings = [
-      {
-        title: 'Need solar panel installation for residential home',
-        neighborhood: 'Downtown',
-        age: 1,
-      },
-      {
-        title: 'Looking for solar company to provide quote',
-        neighborhood: 'Suburbs',
-        age: 2,
-      },
-      {
-        title: 'Wanted: Solar installer for new construction',
-        neighborhood: 'North Side',
-        age: 3,
-      },
-      {
-        title: 'Solar panel cleaning and maintenance needed',
-        neighborhood: 'West End',
-        age: 1,
-      },
-      {
-        title: 'Need help with solar system design and installation',
-        neighborhood: 'East Side',
-        age: 4,
-      },
-    ];
-
-    return mockListings.map((listing, index) => {
-      const lead: ScrapedLead = {
-        name: 'Craigslist User',
-        location: `${listing.neighborhood}, ${city}, ${location}`,
-        request: listing.title,
-        source: this.source,
-        score: 0,
-        priority: 'medium',
-        originalPostUrl: `https://${city}.craigslist.org/hsw/d/${index}`,
-        whyHot: 'Posted service request - actively seeking solar help',
-        actionRequired: 'Respond to Craigslist post with service offer',
-        postedTime: `${listing.age} days ago`,
-        message: listing.title,
-        intent: this.detectIntent(listing.title),
-      };
-
-      lead.score = this.calculateLeadScore(lead);
-      lead.priority = this.determinePriority(lead.score, false);
-
-      return lead;
-    });
   }
 }
 

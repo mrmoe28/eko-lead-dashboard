@@ -34,34 +34,31 @@ export class IncentivesScraper extends BaseScraper {
     try {
       this.log(`Searching solar incentives in ${location}`);
 
-      const useMockData = process.env.USE_MOCK_SCRAPER !== 'false';
-
-      if (useMockData) {
-        this.log(`Using mock data mode for ${location}`);
-        const mockLeads = this.generateMockLeads(location);
-        leads.push(...mockLeads);
-      } else {
-        // In production, this would query DSIRE API or scrape their database
-        // DSIRE (Database of State Incentives for Renewables & Efficiency)
-        // https://www.dsireusa.org/
-        
-        const stateAbbr = this.stateAbbreviations[location];
-        if (!stateAbbr) {
-          this.log(`No state abbreviation found for ${location}`);
-          return leads;
-        }
-
-        // Fetch incentives data
-        const incentives = await this.fetchIncentives(stateAbbr);
-        
-        // Convert incentives to leads (areas with good incentives = hot leads)
-        for (const incentive of incentives) {
-          const lead = this.incentiveToLead(incentive, location);
-          if (lead) leads.push(lead);
-        }
+      // Real scraping only - no mock data
+      // DSIRE (Database of State Incentives for Renewables & Efficiency)
+      // https://www.dsireusa.org/
+      
+      const stateAbbr = this.stateAbbreviations[location];
+      if (!stateAbbr) {
+        this.log(`No state abbreviation found for ${location} - data not available`);
+        return leads;
       }
 
-      this.log(`Found ${leads.length} incentive-based leads in ${location}`);
+      // Fetch incentives data
+      const incentives = await this.fetchIncentives(stateAbbr);
+      
+      // Convert incentives to leads (areas with good incentives = hot leads)
+      for (const incentive of incentives) {
+        const lead = this.incentiveToLead(incentive, location);
+        if (lead) leads.push(lead);
+      }
+
+      if (leads.length === 0) {
+        this.log(`No incentive data found for ${location} - DSIRE API key required for real data`);
+      } else {
+        this.log(`Found ${leads.length} real incentive-based leads in ${location}`);
+      }
+      
       return leads;
     } catch (error: any) {
       this.logError(`Incentives scraping failed: ${error.message}`);
@@ -113,76 +110,6 @@ export class IncentivesScraper extends BaseScraper {
     lead.priority = this.determinePriority(lead.score, false);
 
     return lead;
-  }
-
-  /**
-   * Generate mock leads representing incentive opportunities
-   */
-  private generateMockLeads(location: string): ScrapedLead[] {
-    const stateAbbr = this.stateAbbreviations[location] || 'XX';
-    
-    const mockIncentives = [
-      {
-        name: 'Federal Solar Investment Tax Credit (ITC)',
-        description: '30% federal tax credit for solar installations through 2032',
-        type: 'Tax Credit',
-        value: '30% of system cost',
-        expiry: '2032',
-      },
-      {
-        name: `${location} Solar Rebate Program`,
-        description: `State rebate program offering $0.50/watt for residential solar`,
-        type: 'Rebate',
-        value: '$0.50/watt',
-        expiry: 'While funds available',
-      },
-      {
-        name: 'Net Metering Program',
-        description: 'Full retail credit for excess solar energy sent to grid',
-        type: 'Net Metering',
-        value: '1:1 credit ratio',
-        expiry: 'Ongoing',
-      },
-      {
-        name: `${location} Property Tax Exemption`,
-        description: 'Solar installations exempt from property tax assessment',
-        type: 'Tax Exemption',
-        value: '100% exemption',
-        expiry: 'Permanent',
-      },
-      {
-        name: 'Local Utility Solar Program',
-        description: 'Additional $500 rebate from local utility company',
-        type: 'Utility Rebate',
-        value: '$500 flat rebate',
-        expiry: '2024-12-31',
-      },
-    ];
-
-    return mockIncentives.map((incentive, index) => {
-      const urgency = incentive.expiry.includes('2024') ? 'urgent' : 
-                      incentive.expiry === 'While funds available' ? 'high' : 'medium';
-      
-      const lead: ScrapedLead = {
-        name: `Incentive Opportunity - ${location}`,
-        location: location,
-        request: incentive.name,
-        source: this.source,
-        score: 0,
-        priority: urgency as 'urgent' | 'high' | 'medium' | 'low',
-        originalPostUrl: `https://dsireusa.org/incentives/${stateAbbr.toLowerCase()}/${index}`,
-        whyHot: `${incentive.type}: ${incentive.value} - ${incentive.description}`,
-        actionRequired: `Promote solar with ${incentive.name} incentive to prospects in ${location}`,
-        postedTime: 'Current',
-        message: `${incentive.description}\n\nValue: ${incentive.value}\nExpires: ${incentive.expiry}`,
-        intent: 'incentive_opportunity',
-      };
-
-      // Incentive leads get high scores as they represent marketing opportunities
-      lead.score = 70 + Math.floor(Math.random() * 20);
-      
-      return lead;
-    });
   }
 }
 
