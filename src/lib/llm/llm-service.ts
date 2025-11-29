@@ -218,14 +218,7 @@ export function getLLM(): LLMService {
       timeout: parseInt(process.env.LLM_TIMEOUT || '30000'),
     };
 
-    // Use mock LLM if enabled
-    if (process.env.LLM_USE_MOCK === 'true') {
-      const { createMockLLM } = require('./mock-llm-service');
-      defaultLLMInstance = createMockLLM(config);
-      console.log('[LLM] Using Mock LLM (LM Studio not required)');
-    } else {
-      defaultLLMInstance = new LLMService(config);
-    }
+    defaultLLMInstance = new LLMService(config);
   }
 
   return defaultLLMInstance;
