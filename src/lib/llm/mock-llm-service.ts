@@ -172,11 +172,6 @@ export class MockLLMService extends LLMService {
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-
-  private recordUsage(metrics: any): void {
-    // Mock implementation - just log
-    console.log(`[MockLLM] Request processed: ${metrics.totalTokens} tokens, $${metrics.cost}`);
-  }
 }
 
 /**

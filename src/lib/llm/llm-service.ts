@@ -163,7 +163,7 @@ ${schema}`;
   /**
    * Record usage metrics
    */
-  private recordUsage(metrics: LLMUsageMetrics): void {
+  protected recordUsage(metrics: LLMUsageMetrics): void {
     this.usageMetrics.push(metrics);
 
     // Log for monitoring
