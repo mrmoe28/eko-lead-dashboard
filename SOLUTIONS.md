@@ -144,3 +144,58 @@ Drizzle ORM uses helper functions (`eq`, `gt`, `lt`, `and`, `or`, etc.) rather t
 **Date Fixed:** 2025-11-29
 
 ---
+
+## SSE (Server-Sent Events): Error Shows Empty Object `{}`
+
+**Error:**
+```
+[SSE] Error: {}
+```
+
+**Problem:**
+When an EventSource encounters an error, the `onerror` callback receives an `Event` object, not an `Error` object. Event objects don't serialize their properties when logged, so `console.error('[SSE] Error:', error)` shows `{}`.
+
+This usually happens when:
+1. The SSE connection is closed by the server (session completed/failed)
+2. Network connectivity issues
+3. Server returns an error status (404, 410, 500)
+
+**Solution - Client Side:**
+1. Don't try to log the error object directly - check `eventSource.readyState` instead
+2. Handle expected connection closures gracefully (session complete/failed)
+3. Implement reconnection logic for transient failures
+
+```typescript
+eventSource.onerror = () => {
+  const readyState = eventSource?.readyState;
+  const stateNames = ['CONNECTING', 'OPEN', 'CLOSED'];
+  console.warn(`[SSE] Connection issue - readyState: ${stateNames[readyState ?? 2]}`);
+  
+  // Handle reconnection if needed
+  if (reconnectAttempts < maxReconnectAttempts && sessionIsActive) {
+    setTimeout(reconnect, 3000);
+  }
+};
+```
+
+**Solution - Server Side:**
+1. Return proper HTTP error codes for invalid requests (404, 410)
+2. Send an initial connection acknowledgment event
+3. Gracefully handle stream closure with proper cleanup
+
+```typescript
+// Check session exists before streaming
+if (!session) return new Response("Not found", { status: 404 });
+if (session.status === 'completed') return new Response("Session finished", { status: 410 });
+
+// Send connection acknowledgment
+sendEvent({ type: 'connected', data: { sessionId } });
+```
+
+**Files Changed:**
+- `src/app/scraping/page.tsx`: Improved SSE error handling with readyState logging and reconnection logic
+- `src/app/api/scraping/stream/[id]/route.ts`: Added session validation, connection acknowledgment, and graceful stream closure
+
+**Date Fixed:** 2025-11-29
+
+---

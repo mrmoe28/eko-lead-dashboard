@@ -184,50 +184,100 @@ export default function LiveScrapingPage() {
       return;
     }
 
-    console.log(`[SSE] Connecting to stream for session #${currentSession.id}`);
-    const eventSource = new EventSource(`/api/scraping/stream/${currentSession.id}`);
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
 
-    eventSource.onopen = () => {
-      console.log(`[SSE] Connected to session #${currentSession.id}`);
-      setIsConnected(true);
-    };
+    const connect = () => {
+      console.log(`[SSE] Connecting to stream for session #${currentSession.id} (attempt ${reconnectAttempts + 1})`);
+      eventSource = new EventSource(`/api/scraping/stream/${currentSession.id}`);
 
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log(`[SSE] Received:`, data);
+      eventSource.onopen = () => {
+        console.log(`[SSE] Connected to session #${currentSession.id}`);
+        setIsConnected(true);
+        reconnectAttempts = 0; // Reset on successful connection
+      };
 
-      if (data.type === 'logs') {
-        setLogs((prev) => {
-          const newLogs = [...prev, ...data.data];
-          console.log(`[SSE] Total logs: ${newLogs.length}`);
-          return newLogs;
-        });
-        // Auto-scroll console to bottom
-        setTimeout(() => {
-          if (consoleRef.current) {
-            consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.type === 'connected') {
+            console.log(`[SSE] Server acknowledged connection for session #${data.data.sessionId}`);
+            return;
           }
-        }, 100);
-      } else if (data.type === 'session') {
-        setCurrentSession(data.data);
-        // Update sessions list
-        setSessions((prev) =>
-          prev.map((s) => (s.id === data.data.id ? data.data : s))
-        );
-      }
+
+          if (data.type === 'logs') {
+            setLogs((prev) => {
+              const newLogs = [...prev, ...data.data];
+              console.log(`[SSE] Received ${data.data.length} new logs, total: ${newLogs.length}`);
+              return newLogs;
+            });
+            // Auto-scroll console to bottom
+            setTimeout(() => {
+              if (consoleRef.current) {
+                consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
+              }
+            }, 100);
+          } else if (data.type === 'session') {
+            setCurrentSession(data.data);
+            // Update sessions list
+            setSessions((prev) =>
+              prev.map((s) => (s.id === data.data.id ? data.data : s))
+            );
+            
+            // If session completed/failed, the server will close the connection
+            // This is expected behavior, not an error
+            if (data.data.status === 'completed' || data.data.status === 'failed') {
+              console.log(`[SSE] Session ${data.data.status}, connection will close gracefully`);
+              reconnectAttempts = maxReconnectAttempts; // Prevent reconnection attempts
+            }
+          }
+        } catch (parseError) {
+          console.error(`[SSE] Failed to parse message:`, parseError);
+        }
+      };
+
+      eventSource.onerror = () => {
+        // Get more details about the connection state
+        const readyState = eventSource?.readyState;
+        const stateNames = ['CONNECTING', 'OPEN', 'CLOSED'];
+        console.warn(`[SSE] Connection issue - readyState: ${stateNames[readyState ?? 2]} (${readyState})`);
+        
+        setIsConnected(false);
+        
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        
+        // Attempt reconnect if session should still be active
+        if (reconnectAttempts < maxReconnectAttempts && currentSession.status === 'running') {
+          reconnectAttempts++;
+          console.log(`[SSE] Will attempt reconnect in 3 seconds (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
+          reconnectTimeout = setTimeout(() => {
+            connect();
+          }, 3000);
+        } else {
+          console.log(`[SSE] Max reconnect attempts reached or session not running, stopping reconnection`);
+        }
+      };
     };
 
-    eventSource.onerror = (error) => {
-      console.error(`[SSE] Error:`, error);
-      setIsConnected(false);
-      eventSource.close();
-    };
+    connect();
 
     return () => {
-      eventSource.close();
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
       setIsConnected(false);
     };
-  }, [currentSession?.id]);
+  }, [currentSession?.id, currentSession?.status]);
 
   async function fetchSessions() {
     try {

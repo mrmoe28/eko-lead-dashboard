@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { scrapingLogs, scrapingSessions } from "@/lib/db/schema";
-import { eq, desc, gt } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -16,20 +16,61 @@ export async function GET(
     return new Response("Invalid session ID", { status: 400 });
   }
 
+  // Check if session exists first
+  const [existingSession] = await db
+    .select()
+    .from(scrapingSessions)
+    .where(eq(scrapingSessions.id, sessionId))
+    .limit(1);
+
+  if (!existingSession) {
+    return new Response("Session not found", { status: 404 });
+  }
+
+  // Don't stream for already completed/failed sessions
+  if (existingSession.status === 'completed' || existingSession.status === 'failed') {
+    return new Response("Session already finished", { status: 410 });
+  }
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     async start(controller) {
       let lastLogId = 0;
+      let isClosing = false;
 
-      const sendEvent = (data: any) => {
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify(data)}\n\n`)
-        );
+      const sendEvent = (data: object) => {
+        if (isClosing) return;
+        try {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(data)}\n\n`)
+          );
+        } catch (e) {
+          // Controller may be closed, ignore
+        }
       };
+
+      const closeStream = (intervalId: NodeJS.Timeout) => {
+        if (isClosing) return;
+        isClosing = true;
+        clearInterval(intervalId);
+        try {
+          controller.close();
+        } catch (e) {
+          // Already closed, ignore
+        }
+      };
+
+      // Send initial connection acknowledgment
+      sendEvent({
+        type: 'connected',
+        data: { sessionId, timestamp: new Date().toISOString() },
+      });
 
       // Poll for updates every 2 seconds
       const intervalId = setInterval(async () => {
+        if (isClosing) return;
+        
         try {
           // Get new logs since last check
           const newLogs = await db
@@ -39,7 +80,7 @@ export async function GET(
               eq(scrapingLogs.sessionId, sessionId)
             )
             .orderBy(desc(scrapingLogs.timestamp))
-            .limit(10);
+            .limit(20);
 
           if (newLogs.length > 0) {
             // Filter logs newer than last sent
@@ -70,21 +111,21 @@ export async function GET(
 
             // Stop streaming if session is completed or failed
             if (session.status === 'completed' || session.status === 'failed') {
-              clearInterval(intervalId);
-              controller.close();
+              closeStream(intervalId);
             }
+          } else {
+            // Session was deleted
+            closeStream(intervalId);
           }
         } catch (error) {
           console.error('SSE streaming error:', error);
-          clearInterval(intervalId);
-          controller.close();
+          closeStream(intervalId);
         }
       }, 2000); // Poll every 2 seconds
 
       // Clean up on connection close
       request.signal.addEventListener('abort', () => {
-        clearInterval(intervalId);
-        controller.close();
+        closeStream(intervalId);
       });
     },
   });
@@ -92,8 +133,9 @@ export async function GET(
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no', // Disable nginx buffering
     },
   });
 }
