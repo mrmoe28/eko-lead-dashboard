@@ -255,7 +255,7 @@ export function FloatingAssistant() {
           setIsMinimized(false);
         }}
         className={cn(
-          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/70 transition-all duration-300 flex items-center justify-center group",
+          "fixed bottom-6 right-6 z-[100] w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/70 transition-all duration-300 flex items-center justify-center group",
           isOpen && "scale-90"
         )}
         aria-label="Open AI assistant"
@@ -274,7 +274,7 @@ export function FloatingAssistant() {
       {isOpen && (
         <div
           className={cn(
-            "fixed bottom-24 right-6 z-50 w-96 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-700/60 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300",
+            "fixed bottom-24 right-6 z-[100] w-96 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-700/60 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300",
             isMinimized ? "h-16" : "h-[600px]"
           )}
         >
