@@ -5,6 +5,11 @@
  * Starts the worker manager with configured number of workers
  */
 
+// Load environment variables
+import { config } from 'dotenv';
+import { resolve } from 'path';
+config({ path: resolve(__dirname, '../.env.local') });
+
 import { WorkerManager } from '../src/workers/manager';
 
 async function main() {
