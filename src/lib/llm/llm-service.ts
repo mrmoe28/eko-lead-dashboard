@@ -215,9 +215,17 @@ export function getLLM(): LLMService {
       model: process.env.LLM_MODEL || 'gpt-4',
       maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '1000'),
       temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.7'),
+      timeout: parseInt(process.env.LLM_TIMEOUT || '30000'),
     };
 
-    defaultLLMInstance = new LLMService(config);
+    // Use mock LLM if enabled
+    if (process.env.LLM_USE_MOCK === 'true') {
+      const { createMockLLM } = require('./mock-llm-service');
+      defaultLLMInstance = createMockLLM(config);
+      console.log('[LLM] Using Mock LLM (LM Studio not required)');
+    } else {
+      defaultLLMInstance = new LLMService(config);
+    }
   }
 
   return defaultLLMInstance;
